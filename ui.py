@@ -454,11 +454,58 @@ button[aria-label="Open sidebar"],
 [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) { background: #f7e4de !important; }
 [data-testid="stAlert"] p, [data-testid="stAlert"] span { color: var(--ink) !important; }
 [data-testid="stExpander"] { border-radius: 14px !important; border-color: var(--line) !important; background: var(--panel) !important; }
-[class*="st-key-card_"], [class*="st-key-pcard_"], [class*="st-key-panel_"] {
+[class*="st-key-card_"], [class*="st-key-panel_"] {
     border-color: var(--line) !important; border-radius: 18px !important;
     background: var(--panel) !important; padding: 0.95rem 1.1rem !important;
 }
-[class*="st-key-card_"]:hover, [class*="st-key-pcard_"]:hover { border-color: #d8d3c4 !important; }
+[class*="st-key-card_"]:hover { border-color: #d8d3c4 !important; }
+
+/* ---------- Project cards (Home, Workbench quick-select) ---------- */
+[class*="st-key-pcard_"] {
+    border-color: var(--line) !important;
+    border-radius: 18px !important;
+    background: var(--panel) !important;
+    margin-bottom: 0.65rem !important;
+    transition: border-color 0.15s ease;
+}
+[class*="st-key-pcard_"]:hover {
+    border-color: #d8d3c4 !important;
+}
+[class*="st-key-pcard_"],
+[class*="st-key-pcard_"] [data-testid="stVerticalBlockBorderWrapper"] {
+    min-height: 112px !important;
+    padding: 1.25rem 1.45rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+[class*="st-key-pcard_"] [data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    height: 100% !important;
+    min-height: 100% !important;
+}
+[class*="st-key-pcard_"] [data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+[class*="st-key-pcard_"] [data-testid="column"]:first-child,
+[class*="st-key-pcard_"] .stColumn:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+.project-info-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    height: 100%;
+}
 
 /* Hide Streamlit header hover link icons */
 [data-testid="stHeaderActionElements"],

@@ -91,7 +91,7 @@ with st.container(key="projects_layout"):
                 else '<span class="conf conf-estimated" style="margin-left: 0.4rem;">Draft</span>'
             )
 
-            with st.container(border=True, key=f"pcard_{project['project_id']}"):
+            with st.container(border=True, key=f"pcard_{project['project_id']}", vertical_alignment="center"):
                 left, right = st.columns([3.8, 1.4], vertical_alignment="center")
                 with left:
                     creator = people.get(project["created_by"], project["created_by"])

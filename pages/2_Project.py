@@ -65,7 +65,7 @@ if project is None:
                 unsafe_allow_html=True,
             )
             for p in available:
-                with st.container(border=True, key=f"pcard_{p['project_id']}"):
+                with st.container(border=True, key=f"pcard_{p['project_id']}", vertical_alignment="center"):
                     left, right = st.columns([3.8, 1.4], vertical_alignment="center")
                     with left:
                         desc_text = (
