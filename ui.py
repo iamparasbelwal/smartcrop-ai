@@ -916,3 +916,26 @@ def apply_theme() -> None:
 def esc(value: str) -> str:
     """Escape text that is placed inside the small HTML snippets."""
     return html.escape(value or "")
+
+
+def loading_gif_base64() -> str:
+    """Return the base64-encoded string of the loading biscuit flask GIF."""
+    import base64
+    from pathlib import Path
+    gif_path = Path(__file__).resolve().parent / "assets" / "loading_biscuit_flask.gif"
+    if gif_path.exists():
+        return base64.b64encode(gif_path.read_bytes()).decode("utf-8")
+    return ""
+
+
+def spinner_html(text: str = "Formulating...") -> str:
+    """Return HTML snippet for a centered loading animation with the custom GIF."""
+    b64 = loading_gif_base64()
+    if not b64:
+        return f'<div style="text-align: center; color: var(--muted); padding: 1.5rem;">{esc(text)}</div>'
+    return (
+        f'<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 0; gap: 0.65rem;">'
+        f'<img src="data:image/gif;base64,{b64}" width="72" height="72" alt="Loading..." style="display: block;" />'
+        f'<div style="font-size: 0.86rem; color: var(--muted); font-weight: 500; letter-spacing: 0.02em;">{esc(text)}</div>'
+        f'</div>'
+    )
