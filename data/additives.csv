@@ -1,0 +1,13 @@
+term_id,term,category,why_flagged,natural_option_id,replacement_note,added_at
+A-001,Maltodextrin,Bulking agent,"Refined starch derivative, not a whole-food ingredient",,No direct clean-label equivalent; adjust solids with rice or millet flour.,2026-11-24 14:15:34
+A-002,Monosodium glutamate,Flavour enhancer,"Synthetic glutamate, not declarable in a clean-label product",ING-017,Toasted sesame carries savoury depth without an additive.,2026-11-24 14:15:34
+A-003,Sodium benzoate,Preservative,Chemical preservative,,No clean-label equivalent; control moisture and water activity instead.,2026-11-24 14:15:34
+A-004,Potassium sorbate,Preservative,Chemical preservative,,No clean-label equivalent; reach the shelf life by drying and packing.,2026-11-24 14:15:34
+A-005,Hydrogenated vegetable fat,Fat,Partially hydrogenated fat carries trans-fat risk,,Use a declared cold-pressed oil or defatted groundnut flour.,2026-11-24 14:15:34
+A-006,Artificial flavour,Flavour,"Synthetic flavour blend, cannot be called natural",,Use whole spices or roasted flour notes and declare them.,2026-11-24 14:15:34
+A-007,Tartrazine,Colour,Synthetic azo dye,,A whole-grain base usually needs no colour at all.,2026-11-24 14:15:34
+A-008,Aspartame,Sweetener,Artificial sweetener,ING-012,"Jaggery keeps the sweetening role, with sugar and colour.",2026-11-24 14:15:34
+A-009,Xanthan gum,Thickener,Fermentation-derived additive,ING-013,Guar gum is a seed galactomannan already in the database.,2026-11-24 14:15:34
+A-010,Carrageenan,Thickener,Seaweed extract flagged in clean-label audits,ING-013,Guar gum covers the same water-binding job.,2026-11-24 14:15:34
+A-011,Sodium nitrite,Preservative,"Curing salt, not appropriate for a shelf-stable snack",,Remove it rather than replace it.,2026-11-24 14:15:34
+A-012,Vanillin,Flavour,Isolated synthetic vanillin,,"Use whole vanilla if the flavour is needed, and declare it.",2026-11-24 14:15:34

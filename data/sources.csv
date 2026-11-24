@@ -1,0 +1,4 @@
+source_id,title,publisher,year,url,note,added_at
+S-001,Demo seed: approximate composition ranges from public nutrition references,Team seed data,2026,,Not lab-verified. Replace with IFCT 2017 values or lab measurements before quoting as fact.,2026-11-24 14:04:06
+S-002,"Local mandi retail prices, team spot survey",Team seed data,2026,,"Single-day retail prices, no invoice trail.",2026-11-24 14:04:06
+S-003,Supplier specification sheet (grade-dependent),Team seed data,2026,,Fibre content of guar gum varies widely by grade; treat as unknown until sampled.,2026-11-24 14:04:06
