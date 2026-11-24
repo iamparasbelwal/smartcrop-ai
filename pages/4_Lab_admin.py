@@ -101,12 +101,9 @@ with st.container(key="admin_layout"):
         # Title header row: Title on left, action buttons on right
         head_col_left, head_col_right = st.columns([2.3, 1.7], vertical_alignment="center")
         with head_col_left:
-            st.markdown(
-                f'<div class="wb-eyebrow">{ui.esc(user["lab_id"])} · ADMINISTRATION</div>'
-                f'<h1 class="wb-title" style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif !important; font-size: 2.25rem; font-weight: 700; color: var(--ink); margin: 0.2rem 0 0.45rem 0; letter-spacing: -0.025em; line-height: 1.2;">Lab admin</h1>'
-                f'<div style="font-size: 0.95rem; color: var(--muted); max-width: 680px; margin-bottom: 0.2rem; line-height: 1.5;">{ui.esc(auth.LAB_NAME)} ({ui.esc(user["lab_id"])}) — manage workers, roles, and project permissions.</div>',
-                unsafe_allow_html=True,
-            )
+            st.markdown(f'<div class="wb-eyebrow">{ui.esc(user["lab_id"])} · ADMINISTRATION</div>', unsafe_allow_html=True)
+            st.title("Lab admin")
+            st.caption(f"{auth.LAB_NAME} ({ui.esc(user['lab_id'])}) — manage workers, roles, and project permissions.")
 
         with head_col_right:
             btn_col1, btn_col2 = st.columns([1, 1.3], vertical_alignment="center")
