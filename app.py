@@ -73,7 +73,7 @@ else:
             )
             if st.button("Sign out", key="sign_out_button", width="stretch", icon=":material/logout:"):
                 auth.sign_out()
-                st.switch_page(sign_in_page)
+                st.rerun()
 
     watch_account(user["user_id"])
 

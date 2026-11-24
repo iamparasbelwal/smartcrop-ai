@@ -114,6 +114,8 @@ def bootstrap() -> None:
             [{"lab_id": LAB_ID, "lab_name": LAB_NAME, "created_at": now()}],
         )
 
+    first_time_setup = not USERS_CSV.exists()
+
     if not read_csv(USERS_CSV, USER_FIELDS):
         rows = [
             {
@@ -134,8 +136,8 @@ def bootstrap() -> None:
     if not AUDIT_CSV.exists():
         write_csv(AUDIT_CSV, AUDIT_FIELDS, [])
 
-    # Pre-seed persistent session with demo admin (Paras Belwal) if no session file exists
-    if not SESSION_FILE.exists():
+    # Pre-seed persistent session with demo admin ONLY on the very first setup if users.csv didn't exist
+    if first_time_setup and not SESSION_FILE.exists():
         _save_persistent_session("U-001")
 
 

@@ -47,7 +47,7 @@ if submitted:
         st.error(message)
 
 with st.container(key="auth-demo"):
-    with st.expander("Demo accounts"):
+    with st.expander("Demo accounts", expanded=True):
         st.markdown(
             "| Role | Email | Password |\n"
             "| --- | --- | --- |\n"
@@ -55,6 +55,21 @@ with st.container(key="auth-demo"):
             "| Lab worker | shivam@smartcrop.ai | Worker@123 |\n"
             "| Lab worker | shreyshi@smartcrop.ai | Worker@123 |"
         )
+        st.markdown('<div style="height: 0.4rem;"></div>', unsafe_allow_html=True)
+        st.caption("Quick sign-in as:")
+        qc1, qc2, qc3 = st.columns(3)
+        with qc1:
+            if st.button("Paras (Admin)", key="quick_paras", use_container_width=True):
+                auth.sign_in("paras@smartcrop.ai", "Admin@123")
+                st.rerun()
+        with qc2:
+            if st.button("Shivam (Worker)", key="quick_shivam", use_container_width=True):
+                auth.sign_in("shivam@smartcrop.ai", "Worker@123")
+                st.rerun()
+        with qc3:
+            if st.button("Shreyshi (Worker)", key="quick_shreyshi", use_container_width=True):
+                auth.sign_in("shreyshi@smartcrop.ai", "Worker@123")
+                st.rerun()
         st.caption(
             "Local demo accounts stored in data/users.csv. The lab admin can add or "
             "deactivate workers from the Lab admin page."
