@@ -108,7 +108,7 @@ with st.container(key="admin_layout"):
         with head_col_right:
             btn_col1, btn_col2 = st.columns([1, 1.3], vertical_alignment="center")
             with btn_col1:
-                with st.popover("➕ Add worker", use_container_width=True):
+                with st.popover("Add worker", icon=":material/person_add:", use_container_width=True):
                     st.markdown("**Add a worker**")
                     st.caption(
                         "A worker can sign in, see this lab's projects, and edit formulations. Only admins manage accounts."

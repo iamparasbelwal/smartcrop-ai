@@ -46,7 +46,7 @@ with st.container(key="home_layout"):
         ).strip().lower()
 
     with col_new:
-        with st.popover("➕ New Project", use_container_width=True):
+        with st.popover("New Project", icon=":material/add:", use_container_width=True):
             st.markdown("**Create a new project**")
             with st.form("quick_new_project_form_home", clear_on_submit=True, border=False):
                 new_name = st.text_input("Project name", placeholder="e.g. Lentil protein bar")

@@ -521,14 +521,14 @@ with left:
         st.markdown('<div class="chat-chips-label">Quick Prompts</div>', unsafe_allow_html=True)
         prompt_cols = st.columns(4)
         prompts = [
-            ("⚡ More protein", "more protein"),
-            ("💰 Lower cost", "lower cost"),
-            ("🌾 More millet", "more millet"),
-            ("🍯 Less sugar", "less sweet"),
+            ("More protein", "more protein", ":material/bolt:"),
+            ("Lower cost", "lower cost", ":material/trending_down:"),
+            ("More millet", "more millet", ":material/grass:"),
+            ("Less sugar", "less sweet", ":material/water_drop:"),
         ]
         clicked_prompt = None
-        for pcol, (plabel, pcmd) in zip(prompt_cols, prompts):
-            if pcol.button(plabel, key=f"qp_{pcmd}", use_container_width=True):
+        for pcol, (plabel, pcmd, picon) in zip(prompt_cols, prompts):
+            if pcol.button(plabel, icon=picon, key=f"qp_{pcmd}", use_container_width=True):
                 clicked_prompt = pcmd
 
         with st.form("workbench_chat_form", clear_on_submit=True, border=False):
@@ -638,7 +638,12 @@ with right:
 
         # Tabbed detail tables
         tab_recipe, tab_nutrition, tab_cost, tab_clean = st.tabs(
-            ["🥣 Formulation", "📊 Nutrition", "💰 Cost", "🌿 Additive Check"]
+            [
+                ":material/science: Formulation",
+                ":material/bar_chart: Nutrition",
+                ":material/payments: Cost",
+                ":material/eco: Additive Check",
+            ]
         )
 
         with tab_recipe:
