@@ -459,8 +459,11 @@ a.anchor-link,
 .st-key-composer { max-width: 720px; margin: 0 auto; }
 .section-row { display: flex; align-items: baseline; justify-content: space-between; margin: 2.6rem 0 0.9rem; }
 .section-title {
-    font-family: SERIF_PLACEHOLDER !important; font-size: 1.35rem !important;
-    font-weight: 400 !important; color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.45rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--ink);
 }
 .section-count { color: var(--muted); font-size: 0.78rem; }
 .card-title { font-size: 0.98rem; font-weight: 600; margin-bottom: 0.2rem; }

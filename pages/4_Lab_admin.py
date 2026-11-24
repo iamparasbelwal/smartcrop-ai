@@ -101,7 +101,7 @@ with st.container(key="admin_layout"):
         # Title header on the left
         st.markdown(
             f'<div class="wb-eyebrow">{ui.esc(user["lab_id"])} · ADMINISTRATION</div>'
-            f'<h1 class="wb-title" style="font-family: \'Newsreader\', Georgia, serif; font-size: 2.35rem; font-weight: 500; color: var(--ink); margin: 0.2rem 0 0.45rem 0; letter-spacing: -0.02em; line-height: 1.2;">Lab admin</h1>'
+            f'<h1 class="wb-title" style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif !important; font-size: 2.25rem; font-weight: 700; color: var(--ink); margin: 0.2rem 0 0.45rem 0; letter-spacing: -0.025em; line-height: 1.2;">Lab admin</h1>'
             f'<div style="font-size: 0.95rem; color: var(--muted); max-width: 680px; margin-bottom: 1.5rem; line-height: 1.5;">{ui.esc(auth.LAB_NAME)} ({ui.esc(user["lab_id"])}) — manage workers, roles, and project permissions.</div>',
             unsafe_allow_html=True,
         )

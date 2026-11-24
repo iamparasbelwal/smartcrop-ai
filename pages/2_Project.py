@@ -28,7 +28,7 @@ if project is None:
         .st-key-wb_empty_layout { max-width: 940px !important; margin: 0.5rem 0 2rem 0 !important; padding: 0 !important; }
         .wb-empty-header { margin-bottom: 1.8rem; text-align: left; }
         .wb-empty-header .wb-eyebrow { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 0.35rem; }
-        .wb-empty-header .wb-title { font-family: 'Newsreader', Georgia, serif; font-size: 2.35rem; font-weight: 500; color: var(--ink); margin: 0.2rem 0 0.45rem 0; letter-spacing: -0.02em; line-height: 1.2; }
+        .wb-empty-header .wb-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; font-size: 2.25rem; font-weight: 700; color: var(--ink); margin: 0.2rem 0 0.45rem 0; letter-spacing: -0.025em; line-height: 1.2; }
         .wb-empty-header .wb-desc { font-size: 0.95rem; color: var(--muted); max-width: 640px; margin: 0; line-height: 1.5; }
         </style>
         """,
