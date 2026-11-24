@@ -29,27 +29,33 @@ with st.container(key="people_layout"):
     # Quick statistics cards
     stat_col1, stat_col2, stat_col3 = st.columns(3)
     with stat_col1:
-        with st.container(border=True, key="stat_members"):
+        with st.container(border=True, key="stat_members", height=130, vertical_alignment="center", horizontal_alignment="left"):
             st.markdown(
+                '<div class="stat-card-inner">'
                 '<div class="panel-label">Total Members</div>'
                 f'<div class="cost-big" style="font-size: 1.8rem !important; margin: 0.15rem 0;">{len(people)}</div>'
-                f'<div class="panel-note" style="margin-top: 0.2rem;">{active_count} active accounts</div>',
+                f'<div class="panel-note" style="margin-top: 0.2rem;">{active_count} active accounts</div>'
+                '</div>',
                 unsafe_allow_html=True,
             )
     with stat_col2:
-        with st.container(border=True, key="stat_admins"):
+        with st.container(border=True, key="stat_admins", height=130, vertical_alignment="center", horizontal_alignment="left"):
             st.markdown(
+                '<div class="stat-card-inner">'
                 '<div class="panel-label">Lab Admins</div>'
                 f'<div class="cost-big" style="font-size: 1.8rem !important; margin: 0.15rem 0;">{admin_count}</div>'
-                '<div class="panel-note" style="margin-top: 0.2rem;">Full administration privileges</div>',
+                '<div class="panel-note" style="margin-top: 0.2rem;">Full administration privileges</div>'
+                '</div>',
                 unsafe_allow_html=True,
             )
     with stat_col3:
-        with st.container(border=True, key="stat_workers"):
+        with st.container(border=True, key="stat_workers", height=130, vertical_alignment="center", horizontal_alignment="left"):
             st.markdown(
+                '<div class="stat-card-inner">'
                 '<div class="panel-label">Lab Workers</div>'
                 f'<div class="cost-big" style="font-size: 1.8rem !important; margin: 0.15rem 0;">{worker_count}</div>'
-                '<div class="panel-note" style="margin-top: 0.2rem;">Formulation and project access</div>',
+                '<div class="panel-note" style="margin-top: 0.2rem;">Formulation and project access</div>'
+                '</div>',
                 unsafe_allow_html=True,
             )
 

@@ -250,6 +250,42 @@ button[aria-label="Open sidebar"],
     margin-top: 1.2rem !important;
 }
 
+/* ---------- People KPI Stat Cards ---------- */
+[class*="st-key-stat_"] {
+    min-height: 130px !important;
+}
+[class*="st-key-stat_"] [data-testid="stVerticalBlockBorderWrapper"] {
+    min-height: 130px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 1.1rem 1.3rem !important;
+}
+[class*="st-key-stat_"] [data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    height: 100% !important;
+    min-height: 100% !important;
+}
+[class*="st-key-stat_"] [data-testid="stElementContainer"],
+[class*="st-key-stat_"] [data-testid="stMarkdownContainer"] {
+    width: 100% !important;
+    text-align: left !important;
+}
+.stat-card-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    height: 100%;
+    width: 100%;
+}
+
 /* ---------- People Roster Table Styles ---------- */
 .st-key-people_table_card {
     margin-top: 1.1rem !important;
