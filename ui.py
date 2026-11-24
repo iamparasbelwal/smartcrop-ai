@@ -119,6 +119,12 @@ button[aria-label="Open sidebar"],
     font-size: 0.94rem !important;
 }
 
+/* Hide internal subpages from sidebar navigation */
+a[data-testid="stSidebarNavLink"][href*="Project_access"],
+a[data-testid="stSidebarNavLink"][href*="project_access"] {
+    display: none !important;
+}
+
 [data-testid="stSidebar"] hr { margin: 1rem 0; border-color: var(--line); }
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p { font-size: 0.8rem !important; color: var(--muted) !important; }
 
@@ -235,7 +241,8 @@ button[aria-label="Open sidebar"],
 /* Layout containers for centered symmetric pages */
 .st-key-home_layout,
 .st-key-projects_layout,
-.st-key-people_layout {
+.st-key-people_layout,
+.st-key-access_layout {
     max-width: 940px !important;
     margin: 0 auto !important;
 }
@@ -823,6 +830,8 @@ h1.wb-title,
 .wb-sub,
 .wb-disclaimer,
 .st-key-people_head,
+.st-key-access_head,
+.st-key-access_layout [data-testid="stExpander"],
 [class*="st-key-stat_"],
 .st-key-people_table_card,
 .st-key-auth-form,
@@ -843,6 +852,12 @@ h1.wb-title, .wb-title { animation-delay: 50ms; }
 .wb-sub { animation-delay: 90ms; }
 .wb-disclaimer { animation-delay: 130ms; }
 .st-key-people_head { animation-delay: 20ms; }
+.st-key-access_head { animation-delay: 20ms; }
+.st-key-access_layout [data-testid="stExpander"] { animation-duration: 0.35s; }
+.st-key-access_layout [data-testid="stExpander"]:nth-of-type(1) { animation-delay: 60ms; }
+.st-key-access_layout [data-testid="stExpander"]:nth-of-type(2) { animation-delay: 110ms; }
+.st-key-access_layout [data-testid="stExpander"]:nth-of-type(3) { animation-delay: 160ms; }
+.st-key-access_layout [data-testid="stExpander"]:nth-of-type(4) { animation-delay: 210ms; }
 .st-key-stat_members, [class*="st-key-stat_"]:nth-child(1) { animation-delay: 60ms; }
 .st-key-stat_admins, [class*="st-key-stat_"]:nth-child(2) { animation-delay: 100ms; }
 .st-key-stat_workers, [class*="st-key-stat_"]:nth-child(3) { animation-delay: 140ms; }
