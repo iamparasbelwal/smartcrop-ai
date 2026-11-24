@@ -288,6 +288,27 @@ header[data-testid="stHeader"] > * {
     padding-bottom: 2rem !important;
     margin: 0 !important;
 }
+
+/* Entrance motion for Workbench project titles */
+@keyframes rise-in {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.st-key-wb-head,
+.st-key-wb_head,
+h1.wb-title,
+.wb-title,
+.wb-eyebrow,
+.wb-sub,
+.wb-disclaimer {
+    animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.wb-eyebrow { animation-delay: 20ms; }
+h1.wb-title, .wb-title { animation-delay: 60ms; }
+.wb-sub { animation-delay: 100ms; }
+.wb-disclaimer { animation-delay: 140ms; }
 </style>
 """
 st.markdown(WORKBENCH_SIDEBAR_CSS, unsafe_allow_html=True)

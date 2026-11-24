@@ -727,6 +727,15 @@ html { scrollbar-gutter: stable; }
 .st-key-composer,
 .st-key-chips,
 .st-key-wb-head,
+.st-key-wb_head,
+h1.wb-title,
+.wb-title,
+.wb-eyebrow,
+.wb-sub,
+.wb-disclaimer,
+.st-key-people_head,
+[class*="st-key-stat_"],
+.st-key-people_table_card,
 .st-key-auth-form,
 .st-key-auth-demo,
 [class*="st-key-admin_"],
@@ -739,7 +748,16 @@ html { scrollbar-gutter: stable; }
 }
 
 /* stagger so the page settles from the top down instead of all at once */
-.st-key-wb-head { animation-delay: 20ms; }
+.st-key-wb-head, .st-key-wb_head { animation-delay: 10ms; }
+.wb-eyebrow { animation-delay: 20ms; }
+h1.wb-title, .wb-title { animation-delay: 50ms; }
+.wb-sub { animation-delay: 90ms; }
+.wb-disclaimer { animation-delay: 130ms; }
+.st-key-people_head { animation-delay: 20ms; }
+.st-key-stat_members, [class*="st-key-stat_"]:nth-child(1) { animation-delay: 60ms; }
+.st-key-stat_admins, [class*="st-key-stat_"]:nth-child(2) { animation-delay: 100ms; }
+.st-key-stat_workers, [class*="st-key-stat_"]:nth-child(3) { animation-delay: 140ms; }
+.st-key-people_table_card { animation-delay: 180ms; }
 .st-key-composer { animation-delay: 50ms; }
 .st-key-chips { animation-delay: 110ms; }
 .st-key-auth-form { animation-delay: 70ms; }
