@@ -287,16 +287,18 @@ button[aria-label="Open sidebar"],
 }
 
 /* ---------- People Roster Table Styles ---------- */
-.st-key-people_table_card {
+.st-key-people_table_card,
+.st-key-admin_people_table {
     margin-top: 1.1rem !important;
     padding: 1.4rem 1.6rem !important;
 }
-.st-key-people_table_card .panel-title {
-    font-family: SERIF_PLACEHOLDER !important;
+.st-key-people_table_card .panel-title,
+.st-key-admin_people_table .panel-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 1.25rem !important;
-    font-weight: 500 !important;
+    font-weight: 700 !important;
     color: var(--ink) !important;
-    margin: 0 0 0.8rem 0 !important;
+    margin: 0 0 0.4rem 0 !important;
 }
 .roster-th {
     font-size: 0.78rem !important;
@@ -348,7 +350,8 @@ button[aria-label="Open sidebar"],
     font-weight: 500;
     box-sizing: border-box;
 }
-.st-key-people_table_card [data-testid="stButton"] button {
+.st-key-people_table_card [data-testid="stButton"] button,
+.st-key-admin_people_table [data-testid="stButton"] button {
     height: 36px !important;
     min-height: 36px !important;
     padding: 0 0.8rem !important;
