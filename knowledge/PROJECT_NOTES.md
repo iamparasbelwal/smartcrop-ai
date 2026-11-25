@@ -1,11 +1,12 @@
 # SmartCrop.AI — Project Notes (read this first in any future session)
 
-_Last updated: 2026-11-24 · Status: M0–M5, M7, M8-chat + Formulation Persistence & Export built — local sign-in, 3 seeded accounts,
+_Last updated: 2026-11-25 · Status: M0–M5, M7, M8-chat, M9 built — local sign-in, 3 seeded accounts,
 admin manages workers (deactivation kills a live session within ~5 s), Home has a time-aware
 greeting, the lab's project list, project creation, and the sidebar lists the lab's projects. The
 workbench (M3) shows formulation/what-if + nutrition/cost layout, seeded crop database (M4) with
 nutrition/cost computed in Python (M5), deterministic clean-label check (M7), and full CSV formulation
-persistence with versioning and downloadable Markdown lab validation spec sheets (Option A)._
+persistence with versioning, version-to-version comparison, downloadable Markdown lab validation
+spec sheets (Option A), admin data verification, and a read-only audit log._
 
 ## What this is
 A **multi-page Streamlit + Python web app** that turns locally available crops into candidate
@@ -67,7 +68,9 @@ Page map:
 | Home | `pages/1_Home.py` | all | Time-aware greeting, lab project list, create project |
 | Project workbench | `pages/2_Project.py` | all (lab-scoped) | Left: formulation + what-if. Right: nutrition + cost |
 | Crop database | `pages/3_Ingredients.py` | all read; admin edit | Region-filtered ingredient explorer, confidence tags |
-| Lab admin | `pages/4_Lab_admin.py` | lab_admin only | Manage workers, verify data, audit log |
+| Lab admin | `pages/4_Lab_admin.py` | lab_admin only | Manage workers, link to data verification and the audit log |
+| Verify data | `pages/7_Verify_data.py` | lab_admin only | Crop table with both confidence tags; edit values, name the source, attach a lab report |
+| Audit log | `pages/8_Audit_log.py` | lab_admin only | Read-only event history with filters, CSV download, and per-entry detail + lab report |
 
 ## Roles & permissions
 - Roles: `lab_admin`, `lab_worker`. Users belong to a `lab_id`.
@@ -176,6 +179,21 @@ edits, verifications and generated formulations (table, record, field, old, new,
   by project id, so they reset on reload and never touch the CSVs. **No AI is called.** When M6
   lands, `whatif.apply` is the function to replace with the model call.
 - M9 Admin verification + audit log + save/compare/export.
+  **BUILT 2026-11-25** — save and Markdown export were already live; this milestone adds the other
+  two halves. **Verify data** (`pages/7_Verify_data.py`, admin only): the 17-crop table with both
+  confidence tags, category/status/search filters, and a per-row dialog that **edits the crop's
+  numbers** (energy, protein, fat, carbs, fibre, moisture, cost), marks nutrition and/or cost as
+  `verified` (or drops them back to `estimated`), and will not save without a named source plus an
+  optional **lab report upload** (PDF/photo, stored in `data/lab_reports/`).
+  `ingredients.save_verification` writes each changed field, stamps `updated_at` and logs one audit
+  event per changed field. **Audit log** (`pages/8_Audit_log.py`, admin only): every event
+  newest-first with actor name, area, record id and old → new, filters by person/area/search, a
+  filtered CSV download, and an **Open** button per row that shows the full entry and downloads its
+  attached lab report (the `lab_report` column in `data/audit_log.csv`);
+  `auth.read_audit_log()`, `auth.save_lab_report()` and `auth.lab_report_path()` back it. **Compare**: a fifth workbench tab,
+  **Versions**, compares any two saved versions — protein/energy/cost before → after, an
+  ingredient diff with the biggest move first (`formulations.compare_items`), and a button that
+  loads the chosen version back into the workbench without saving.
 
 ## Visual direction — NOW IMPLEMENTED (owner asked for a Claude/ChatGPT-style homepage, 2026-11-24)
 The style freeze is lifted for Home + sign in. Palette lives in `.streamlit/config.toml` (base

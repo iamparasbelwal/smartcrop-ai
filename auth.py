@@ -24,6 +24,7 @@ LABS_CSV = DATA_DIR / "labs.csv"
 USERS_CSV = DATA_DIR / "users.csv"
 AUDIT_CSV = DATA_DIR / "audit_log.csv"
 SESSION_FILE = DATA_DIR / "session.json"
+LAB_REPORTS_DIR = DATA_DIR / "lab_reports"
 
 LAB_ID = "LAB-001"
 LAB_NAME = "SmartCrop Demo Lab"
@@ -59,6 +60,7 @@ AUDIT_FIELDS = [
     "old_value",
     "new_value",
     "note",
+    "lab_report",
 ]
 
 _SCRYPT = {"n": 16384, "r": 8, "p": 1, "dklen": 32}
@@ -269,6 +271,7 @@ def log_event(
     old_value: str = "",
     new_value: str = "",
     note: str = "",
+    lab_report: str = "",
 ) -> None:
     rows = read_csv(AUDIT_CSV, AUDIT_FIELDS)
     numbers = [
@@ -287,9 +290,43 @@ def log_event(
             "old_value": old_value,
             "new_value": new_value,
             "note": note,
+            "lab_report": lab_report,
         }
     )
     write_csv(AUDIT_CSV, AUDIT_FIELDS, rows)
+
+
+def save_lab_report(data: bytes, filename: str, record_id: str) -> str:
+    """Store an uploaded lab report under data/lab_reports/ and return its path."""
+    LAB_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    safe_name = "".join(
+        char if (char.isalnum() or char in " ._-") else "_"
+        for char in Path(filename or "lab_report").name
+    ).strip() or "lab_report"
+    stamp = now().replace("-", "").replace(":", "").replace(" ", "-")
+    path = LAB_REPORTS_DIR / f"{stamp}-{record_id}-{safe_name}"
+    path.write_bytes(data)
+    return path.relative_to(APP_DIR).as_posix()
+
+
+def lab_report_path(relative: str) -> Path | None:
+    """Absolute path of a stored lab report, or None when the file is gone."""
+    if not (relative or "").strip():
+        return None
+    path = APP_DIR / relative
+    return path if path.is_file() else None
+
+
+def read_audit_log() -> list[dict[str, str]]:
+    """Every audit event, newest first."""
+    rows = read_csv(AUDIT_CSV, AUDIT_FIELDS)
+    rows.sort(key=lambda row: (row["at"], row["event_id"]), reverse=True)
+    return rows
+
+
+def user_names() -> dict[str, str]:
+    """Map every user id in the file to a display name, active or not."""
+    return {row["user_id"]: row["name"] for row in read_csv(USERS_CSV, USER_FIELDS)}
 
 
 # --------------------------------------------------------------------------- #

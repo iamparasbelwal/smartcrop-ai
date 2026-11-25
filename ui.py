@@ -253,6 +253,12 @@ a[data-testid="stSidebarNavLink"][href*="project_access"] {
     padding: 0.6rem 2.2rem 2.5rem 2.2rem !important;
     box-sizing: border-box !important;
 }
+.st-key-verify_layout,
+.st-key-audit_layout {
+    max-width: 100% !important;
+    padding: 0.6rem 2.2rem 2.5rem 2.2rem !important;
+    box-sizing: border-box !important;
+}
 .st-key-admin_access_card {
     margin-top: 1.2rem !important;
 }
@@ -295,12 +301,16 @@ a[data-testid="stSidebarNavLink"][href*="project_access"] {
 
 /* ---------- People Roster Table Styles ---------- */
 .st-key-people_table_card,
-.st-key-admin_people_table {
+.st-key-admin_people_table,
+.st-key-verify_table_card,
+.st-key-audit_table_card {
     margin-top: 1.1rem !important;
     padding: 1.4rem 1.6rem !important;
 }
 .st-key-people_table_card .panel-title,
-.st-key-admin_people_table .panel-title {
+.st-key-admin_people_table .panel-title,
+.st-key-verify_table_card .panel-title,
+.st-key-audit_table_card .panel-title {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 1.25rem !important;
     font-weight: 700 !important;
@@ -343,6 +353,10 @@ a[data-testid="stSidebarNavLink"][href*="project_access"] {
     font-size: 0.88rem;
     color: #4c4842;
 }
+.roster-cell.num {
+    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+}
 .roster-current-tag {
     height: 36px;
     width: 100%;
@@ -358,7 +372,9 @@ a[data-testid="stSidebarNavLink"][href*="project_access"] {
     box-sizing: border-box;
 }
 .st-key-people_table_card [data-testid="stButton"] button,
-.st-key-admin_people_table [data-testid="stButton"] button {
+.st-key-admin_people_table [data-testid="stButton"] button,
+.st-key-verify_table_card [data-testid="stButton"] button,
+.st-key-audit_table_card [data-testid="stButton"] button {
     height: 36px !important;
     min-height: 36px !important;
     padding: 0 0.8rem !important;
@@ -389,7 +405,8 @@ a[data-testid="stSidebarNavLink"][href*="project_access"] {
 .st-key-composer [data-testid="stForm"] input::placeholder,
 .st-key-auth-form [data-testid="stForm"] input::placeholder { color: #a8a29a !important; }
 .st-key-composer [data-testid="stForm"] [data-testid="InputInstructions"],
-.st-key-auth-form [data-testid="stForm"] [data-testid="InputInstructions"] { display: none !important; }
+.st-key-auth-form [data-testid="stForm"] [data-testid="InputInstructions"],
+.st-key-panel_chat [data-testid="stForm"] [data-testid="InputInstructions"] { display: none !important; }
 .composer-hint { color: var(--muted); font-size: 0.75rem; line-height: 1.35; }
 
 /* ---------- what-if chat ---------- */
@@ -688,7 +705,7 @@ h1.wb-title {
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
-    min-height: 640px !important;
+    min-height: clamp(560px, 74vh, 880px) !important;
 }
 
 .st-key-panel_spec {
@@ -700,22 +717,79 @@ h1.wb-title {
     min-height: 640px !important;
 }
 
+.chat-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--line);
+}
 .chat-header {
     margin-bottom: 0.6rem;
     padding-bottom: 0.6rem;
     border-bottom: 1px solid var(--line);
 }
+.chat-engine {
+    flex-shrink: 0;
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b665c;
+    background: var(--sand);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.16rem 0.5rem;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+}
+.chat-meta {
+    display: block;
+    margin-top: 0.4rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgba(34, 32, 28, 0.08);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #857f73;
+}
+.chat-row:last-child { animation: rise-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.ai-note {
+    margin-top: 0.75rem;
+    padding: 0.7rem 0.85rem;
+    background: #fbf3ee;
+    border: 1px solid #f0dcd1;
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    color: #4c4842;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+.ai-note .ai-note-label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8a5a2b;
+    margin-bottom: 0.25rem;
+}
 
 .chat-log {
-    max-height: 520px;
-    min-height: 420px;
+    height: clamp(320px, 46vh, 620px);
+    min-height: 280px;
     overflow-y: auto;
-    padding: 0.6rem 0.2rem;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+    padding: 0.6rem 0.35rem 0.6rem 0.2rem;
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
     scrollbar-width: thin;
 }
+.chat-log::-webkit-scrollbar { width: 6px; }
+.chat-log::-webkit-scrollbar-thumb { background: #e0dbcb; border-radius: 999px; }
+.chat-log:empty { display: none; }
 
 .chat-row {
     display: flex;
@@ -756,6 +830,100 @@ h1.wb-title {
     letter-spacing: 0.1em;
     color: var(--muted);
     margin: 0.8rem 0 0.4rem;
+}
+.chat-row.ai .chat-bubble,
+.chat-row.me .chat-bubble { overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
+
+/* Claude-style inline thinking & GIF status row inside chat stream */
+.ai-status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.25rem 0.15rem 0.35rem;
+    color: var(--muted);
+    font-size: 0.86rem;
+    animation: rise-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ai-status-gif {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+    background: transparent !important;
+}
+.ai-status-text {
+    color: #5b564d;
+    font-weight: 500;
+}
+.ai-status-chevron {
+    color: #9b9487;
+    font-size: 1rem;
+    line-height: 1;
+    margin-left: 0.05rem;
+}
+.ai-thought-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 90%;
+    gap: 0.35rem;
+}
+.ai-thought-wrap .chat-bubble {
+    max-width: 100% !important;
+}
+details.ai-thought {
+    width: 100%;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+details.ai-thought summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.18rem 0.25rem;
+    color: #6b655b;
+    font-weight: 500;
+    user-select: none;
+}
+details.ai-thought summary::-webkit-details-marker { display: none; }
+details.ai-thought summary:hover { color: var(--ink); }
+details.ai-thought[open] summary .ai-status-chevron {
+    transform: rotate(90deg);
+    display: inline-block;
+}
+.ai-thought-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+.ai-thought-dots i {
+    display: inline-block;
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+.ai-thought-body {
+    margin: 0.25rem 0 0.35rem 0.2rem;
+    padding: 0.6rem 0.8rem;
+    background: #fbf9f4;
+    border: 1px solid var(--line);
+    border-left: 2px solid #d8cfc0;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #59544b;
+}
+
+/* Narrow screens: the two workbench columns stack and the chat keeps a readable height. */
+@media (max-width: 900px) {
+    .chat-log { height: clamp(260px, 40vh, 460px); }
+    .st-key-panel_chat, .st-key-panel_spec { min-height: 0 !important; }
+    .chat-row.ai .chat-bubble { max-width: 96%; }
+    .chat-row.me .chat-bubble { max-width: 92%; }
+    .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Quick KPI Strip on top of Right Pane */
@@ -807,6 +975,88 @@ h1.wb-title {
     font-weight: 600 !important;
 }
 
+/* Empty formulation skeleton wireframe */
+.skel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.05rem;
+}
+.skel-actions { display: flex; gap: 0.45rem; }
+.skel-btn-ghost {
+    width: 62px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px dashed var(--line);
+    background: #fbf9f4;
+}
+.skel-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.7rem;
+    margin-bottom: 1.15rem;
+}
+.skel-kpi-card {
+    background: #fbf9f4;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 0.65rem 0.8rem;
+}
+.skel-bar {
+    background: #eae6da;
+    border-radius: 6px;
+}
+.skel-val { width: 58%; height: 20px; margin: 0.4rem 0 0.35rem; }
+.skel-sub { width: 76%; height: 9px; opacity: 0.7; }
+.skel-tab-bar {
+    display: flex;
+    gap: 1.1rem;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0.55rem;
+    margin-bottom: 0.75rem;
+}
+.skel-tab {
+    font-size: 0.84rem;
+    color: #a19b8e;
+    font-weight: 500;
+}
+.skel-tab.active {
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 0.55rem;
+    margin-bottom: -0.62rem;
+}
+.skel-table-head {
+    display: grid;
+    grid-template-columns: 2.3fr 1.1fr 1.3fr 0.9fr;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9e988c;
+    padding: 0.35rem 0.2rem 0.55rem;
+    border-bottom: 1px solid var(--line);
+}
+.skel-row {
+    display: grid;
+    grid-template-columns: 2.3fr 1.1fr 1.3fr 0.9fr;
+    align-items: center;
+    padding: 0.72rem 0.2rem;
+    border-bottom: 1px solid #f3f0e5;
+}
+.skel-empty-note {
+    margin-top: 1.25rem;
+    padding: 1rem 1.15rem;
+    background: #fbf9f4;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.55;
+    text-align: center;
+}
+.skel-empty-note strong { color: var(--ink); font-weight: 600; }
+
 /* Reserve the scrollbar gutter: expanding a card must not shift the page sideways. */
 html { scrollbar-gutter: stable; }
 [data-testid="stMain"] { scrollbar-gutter: stable; }
@@ -831,6 +1081,8 @@ h1.wb-title,
 .wb-disclaimer,
 .st-key-people_head,
 .st-key-access_head,
+.st-key-verify_head,
+.st-key-audit_head,
 .st-key-access_layout [data-testid="stExpander"],
 [class*="st-key-stat_"],
 .st-key-people_table_card,
@@ -853,6 +1105,8 @@ h1.wb-title, .wb-title { animation-delay: 50ms; }
 .wb-disclaimer { animation-delay: 130ms; }
 .st-key-people_head { animation-delay: 20ms; }
 .st-key-access_head { animation-delay: 20ms; }
+.st-key-verify_head { animation-delay: 20ms; }
+.st-key-audit_head { animation-delay: 20ms; }
 .st-key-access_layout [data-testid="stExpander"] { animation-duration: 0.35s; }
 .st-key-access_layout [data-testid="stExpander"]:nth-of-type(1) { animation-delay: 60ms; }
 .st-key-access_layout [data-testid="stExpander"]:nth-of-type(2) { animation-delay: 110ms; }
@@ -891,6 +1145,8 @@ h1.wb-title, .wb-title { animation-delay: 50ms; }
     .st-key-wb-head,
     .st-key-auth-form,
     .st-key-auth-demo,
+    .st-key-verify_head,
+    .st-key-audit_head,
     [class*="st-key-admin_"],
     [class*="st-key-card_"],
     [class*="st-key-panel_"],
@@ -918,6 +1174,26 @@ def esc(value: str) -> str:
     return html.escape(value or "")
 
 
+def autoscroll(selector: str = ".chat-log") -> None:
+    """Keep the chat pinned to its newest message without a rerun."""
+    import streamlit.components.v1 as components
+
+    components.html(
+        "<script>"
+        "const box = window.parent.document.querySelector('" + selector + "');"
+        "if (box) { box.scrollTop = box.scrollHeight; }"
+        "</script>",
+        height=0,
+    )
+
+
+def ai_note(text: str, label: str = "Gemini") -> str:
+    """A tinted callout for a model-written paragraph."""
+    return (
+        f'<div class="ai-note"><span class="ai-note-label">{esc(label)}</span>{esc(text)}</div>'
+    )
+
+
 def loading_gif_base64() -> str:
     """Return the base64-encoded string of the loading biscuit flask GIF."""
     import base64
@@ -928,6 +1204,23 @@ def loading_gif_base64() -> str:
     return ""
 
 
+def status_html(text: str = "Searching private crop database") -> str:
+    """Claude-style inline progress row with transparent biscuit-in-flask GIF."""
+    b64 = loading_gif_base64()
+    icon = (
+        f'<img src="data:image/gif;base64,{b64}" class="ai-status-gif" alt="" />'
+        if b64
+        else '<span class="ai-thought-dots"><i></i><i></i><i></i></span>'
+    )
+    return (
+        f'<div class="ai-status-row">'
+        f"{icon}"
+        f'<span class="ai-status-text">{esc(text)}</span>'
+        f'<span class="ai-status-chevron">&rsaquo;</span>'
+        f"</div>"
+    )
+
+
 def spinner_html(text: str = "Formulating...") -> str:
     """Return HTML snippet for a centered loading animation with the custom GIF."""
     b64 = loading_gif_base64()
@@ -935,7 +1228,7 @@ def spinner_html(text: str = "Formulating...") -> str:
         return f'<div style="text-align: center; color: var(--muted); padding: 1.5rem;">{esc(text)}</div>'
     return (
         f'<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 0; gap: 0.65rem;">'
-        f'<img src="data:image/gif;base64,{b64}" width="72" height="72" alt="Loading..." style="display: block;" />'
+        f'<img src="data:image/gif;base64,{b64}" width="64" height="64" alt="Loading..." style="display: block; background: transparent;" />'
         f'<div style="font-size: 0.86rem; color: var(--muted); font-weight: 500; letter-spacing: 0.02em;">{esc(text)}</div>'
         f'</div>'
     )

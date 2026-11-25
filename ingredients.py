@@ -9,6 +9,7 @@ Nothing here does arithmetic on a formulation; it only answers "what is this ing
 
 from __future__ import annotations
 
+import auth
 from storage import DATA_DIR, now, read_csv, write_csv
 
 INGREDIENTS_CSV = DATA_DIR / "ingredients.csv"
@@ -217,3 +218,127 @@ def number(row: dict[str, str], field: str) -> float:
 def cost_per_100g(ingredient: dict[str, str]) -> float:
     """Ingredient cost for 100 g, derived from the per-kg mandi price."""
     return number(ingredient, "cost_per_kg") / 10
+
+
+CONFIDENCE_LEVELS = ("verified", "estimated", "unknown")
+
+
+def verified_counts() -> dict[str, int]:
+    """How much of the ingredient table a person has actually checked."""
+    rows = read_csv(INGREDIENTS_CSV, INGREDIENT_FIELDS)
+    return {
+        "ingredients": len(rows),
+        "nutrition_verified": sum(1 for row in rows if row["nutrition_confidence"] == "verified"),
+        "cost_verified": sum(1 for row in rows if row["cost_confidence"] == "verified"),
+        "nutrition_unknown": sum(1 for row in rows if row["nutrition_confidence"] == "unknown"),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Correcting values (admin verification)
+# --------------------------------------------------------------------------- #
+NUMERIC_FIELDS: dict[str, dict[str, object]] = {
+    "energy_kcal": {"label": "Energy (kcal / 100 g)", "step": 1.0, "format": "%.0f"},
+    "protein_g": {"label": "Protein (g / 100 g)", "step": 0.1, "format": "%.1f"},
+    "fat_g": {"label": "Fat (g / 100 g)", "step": 0.1, "format": "%.1f"},
+    "carbs_g": {"label": "Carbs (g / 100 g)", "step": 0.1, "format": "%.1f"},
+    "fibre_g": {"label": "Fibre (g / 100 g)", "step": 0.1, "format": "%.1f"},
+    "moisture_g": {"label": "Moisture (g / 100 g)", "step": 0.1, "format": "%.1f"},
+    "cost_per_kg": {"label": "Cost (₹ / kg)", "step": 0.5, "format": "%.2f"},
+}
+EDIT_FIELDS = tuple(NUMERIC_FIELDS)
+COST_FIELD = "cost_per_kg"
+
+
+def display_value(field: str, value: float) -> str:
+    """How one number reads in the audit log."""
+    if field == COST_FIELD:
+        return f"₹{value:,.2f} / kg"
+    if field == "energy_kcal":
+        return f"{value:,.0f} kcal / 100 g"
+    return f"{value:,.1f} g / 100 g"
+
+
+def save_verification(
+    ingredient_id: str,
+    values: dict[str, float],
+    nutrition_confidence: str,
+    cost_confidence: str,
+    actor_id: str,
+    reference: str = "",
+    lab_report: str = "",
+) -> tuple[bool, str]:
+    """Write corrected values and confidence tags, auditing every field that moved."""
+    if nutrition_confidence not in CONFIDENCE_LEVELS or cost_confidence not in CONFIDENCE_LEVELS:
+        return False, "Unknown confidence value."
+
+    rows = read_csv(INGREDIENTS_CSV, INGREDIENT_FIELDS)
+    target = next((row for row in rows if row["ingredient_id"] == ingredient_id), None)
+    if target is None:
+        return False, "Ingredient not found."
+
+    reference = (reference or "").strip()
+    changed: list[tuple[str, str, str]] = []
+    for field in EDIT_FIELDS:
+        if field not in values:
+            continue
+        try:
+            new_value = round(float(values[field]), 2)
+        except (TypeError, ValueError):
+            return False, f"{NUMERIC_FIELDS[field]['label']} is not a number."
+        old_value = number(target, field)
+        if abs(new_value - old_value) < 0.005:
+            continue
+        changed.append((field, display_value(field, old_value), display_value(field, new_value)))
+        target[field] = f"{new_value:g}"
+
+    old_confidence = f"nutrition {target['nutrition_confidence']}, cost {target['cost_confidence']}"
+    confidence_changed = (
+        target["nutrition_confidence"] != nutrition_confidence
+        or target["cost_confidence"] != cost_confidence
+    )
+
+    if not changed and not confidence_changed:
+        return False, "Nothing changed — the values and checks are already what you see."
+    if changed and not reference:
+        return False, "Say what you checked the new values against before saving."
+
+    target["nutrition_confidence"] = nutrition_confidence
+    target["cost_confidence"] = cost_confidence
+    target["updated_at"] = now()
+    write_csv(INGREDIENTS_CSV, INGREDIENT_FIELDS, rows)
+
+    suffix = f": {reference}" if reference else ""
+    for field, old_text, new_text in changed:
+        auth.log_event(
+            actor_id,
+            table="ingredients",
+            record_id=ingredient_id,
+            field=field,
+            old_value=old_text,
+            new_value=new_text,
+            note=f"Value corrected on verification{suffix}",
+            lab_report=lab_report,
+        )
+
+    new_confidence = f"nutrition {nutrition_confidence}, cost {cost_confidence}"
+    if confidence_changed:
+        auth.log_event(
+            actor_id,
+            table="ingredients",
+            record_id=ingredient_id,
+            field="nutrition_confidence, cost_confidence",
+            old_value=old_confidence,
+            new_value=new_confidence,
+            note=f"Lab verification recorded{suffix}",
+            lab_report=lab_report,
+        )
+
+    parts: list[str] = []
+    if changed:
+        parts.append(f"{len(changed)} value{'s' if len(changed) != 1 else ''} updated")
+    if confidence_changed:
+        parts.append(new_confidence)
+    if lab_report:
+        parts.append("lab report attached")
+    return True, f"{target['name']}: " + ", ".join(parts) + "."

@@ -43,6 +43,12 @@ lab_admin_page = st.Page(
 project_access_page = st.Page(
     "pages/6_Project_access.py", title="Project access", icon=":material/lock_open:"
 )
+verify_page = st.Page(
+    "pages/7_Verify_data.py", title="Verify data", icon=":material/fact_check:"
+)
+audit_page = st.Page(
+    "pages/8_Audit_log.py", title="Audit log", icon=":material/history:"
+)
 
 
 @st.fragment(run_every=5)
@@ -82,7 +88,7 @@ else:
 
     pages = [home_page, project_page, people_page]
     if user["role"] == "lab_admin":
-        pages.extend([lab_admin_page, project_access_page])
+        pages.extend([lab_admin_page, verify_page, audit_page, project_access_page])
     navigation = st.navigation(pages)
 
 navigation.run()

@@ -83,31 +83,149 @@ def total_share(rows: list[dict]) -> float:
     return round(sum(row["share_pct"] for row in rows), 1)
 
 
+def validate_items(
+    proposed: list[tuple[str, float]],
+) -> tuple[bool, list[tuple[str, float]], list[str]]:
+    """The gate every AI-proposed recipe must pass before it can enter the workbench.
+
+    Real ingredient ids only, no negative shares, each crop under its practical cap, and the
+    shares rescaled to exactly 100 %. Returns ``(ok, items, notes)`` where the notes explain
+    every correction that was applied, so the user can see what the model got wrong.
+    """
+    notes: list[str] = []
+    shares: dict[str, float] = {}
+
+    for ingredient_id, share in proposed:
+        ingredient = ingredients.get_ingredient(str(ingredient_id).strip())
+        if ingredient is None:
+            if str(ingredient_id).strip():
+                notes.append(f"dropped “{str(ingredient_id).strip()}” — not in the crop database")
+            continue
+        try:
+            value = float(share)
+        except (TypeError, ValueError):
+            notes.append(f"dropped {ingredient['name']} — share was not a number")
+            continue
+        if value <= 0:
+            continue
+        shares[ingredient["ingredient_id"]] = shares.get(ingredient["ingredient_id"], 0.0) + value
+
+    if not shares:
+        return False, [], notes + ["no usable ingredient was proposed"]
+
+    caps = {
+        ingredient_id: max(0.0, ingredients.number(ingredients.get_ingredient(ingredient_id) or {}, "max_practical_pct") or 100.0)
+        for ingredient_id in shares
+    }
+
+    def capped() -> list[str]:
+        return [key for key, value in shares.items() if value > caps[key] + 0.001]
+
+    for _ in range(6):
+        over = capped()
+        if not over:
+            break
+        for key in over:
+            notes.append(
+                f"{ingredients.get_ingredient(key)['name']} held at its {caps[key]:.0f}% practical cap"
+            )
+            shares[key] = caps[key]
+        free = {key: value for key, value in shares.items() if key not in over}
+        fixed_total = sum(shares[key] for key in over)
+        free_total = sum(free.values())
+        target = 100.0 - fixed_total
+        if target <= 0.05 or free_total <= 0:
+            break
+        for key, value in free.items():
+            shares[key] = value * target / free_total
+
+    total = sum(shares.values())
+    if total <= 0:
+        return False, [], notes + ["every proposed share was zero"]
+
+    if abs(total - 100.0) > 0.05:
+        scale = 100.0 / total
+        for key in shares:
+            if shares[key] < caps[key] - 0.001:
+                shares[key] *= scale
+        notes.append(f"shares rescaled from {total:.1f}% to 100%")
+
+    items = [(key, round(value, 1)) for key, value in shares.items() if value >= 0.1]
+    drift = round(100.0 - sum(value for _, value in items), 1)
+    if abs(drift) >= 0.1 and items:
+        key, value = max(items, key=lambda pair: pair[1])
+        items = [(k, round(v + drift, 1) if k == key else v) for k, v in items]
+
+    if not items:
+        return False, [], notes + ["no ingredient survived validation"]
+    return True, items, list(dict.fromkeys(notes))
+
+
+def list_project_formulations(project_id: str) -> list[dict[str, str]]:
+    """Every saved version of this project's formulation, newest first."""
+    rows = [f for f in read_csv(FORMULATIONS_CSV, FORMULATION_FIELDS) if f["project_id"] == project_id]
+    rows.sort(key=lambda f: (int(f.get("version") or 0), f.get("created_at") or ""), reverse=True)
+    return rows
+
+
+def formulation_items(formulation_id: str) -> list[tuple[str, float]]:
+    """The saved (ingredient id, share %) pairs of one formulation."""
+    all_items = read_csv(FORMULATION_ITEMS_CSV, FORMULATION_ITEM_FIELDS)
+    items: list[tuple[str, float]] = []
+    for item in all_items:
+        if item["formulation_id"] != formulation_id:
+            continue
+        try:
+            share = float(item["share_pct"] or 0)
+        except ValueError:
+            share = 0.0
+        items.append((item["ingredient_id"], share))
+    return items
+
+
 def get_latest_project_formulation(project_id: str) -> tuple[dict[str, str] | None, list[tuple[str, float]]]:
     """Return the most recently saved formulation metadata and items for this project.
 
-    If no saved formulation exists yet, returns (None, starter_items()).
+    If no saved formulation exists yet, returns (None, []).
     """
-    all_formulations = read_csv(FORMULATIONS_CSV, FORMULATION_FIELDS)
-    project_forms = [f for f in all_formulations if f["project_id"] == project_id]
-    if not project_forms:
-        return None, starter_items()
+    versions = list_project_formulations(project_id)
+    if not versions:
+        return None, []
 
-    # Newest version first
-    project_forms.sort(key=lambda f: (int(f.get("version") or 1), f.get("created_at") or ""), reverse=True)
-    latest = project_forms[0]
+    latest = versions[0]
+    saved = formulation_items(latest["formulation_id"])
+    return latest, saved
 
-    all_items = read_csv(FORMULATION_ITEMS_CSV, FORMULATION_ITEM_FIELDS)
-    matching_items = [
-        (item["ingredient_id"], float(item["share_pct"]))
-        for item in all_items
-        if item["formulation_id"] == latest["formulation_id"]
-    ]
 
-    if not matching_items:
-        return latest, starter_items()
+def compare_items(
+    items_a: list[tuple[str, float]], items_b: list[tuple[str, float]]
+) -> list[dict]:
+    """Line up two recipes by ingredient and show how each share moved.
 
-    return latest, matching_items
+    Ingredients that appear in only one version are included with a 0 share, so a swap
+    reads as one row leaving and another arriving. Biggest change comes first.
+    """
+    shares_a = dict(items_a)
+    shares_b = dict(items_b)
+    order = list(dict.fromkeys([i for i, _ in items_a] + [i for i, _ in items_b]))
+
+    rows = []
+    for ingredient_id in order:
+        ingredient = ingredients.get_ingredient(ingredient_id)
+        if ingredient is None:
+            continue
+        share_a = round(shares_a.get(ingredient_id, 0.0), 1)
+        share_b = round(shares_b.get(ingredient_id, 0.0), 1)
+        rows.append(
+            {
+                "ingredient": ingredient,
+                "share_a": share_a,
+                "share_b": share_b,
+                "delta": round(share_b - share_a, 1),
+            }
+        )
+    rows.sort(key=lambda row: abs(row["delta"]), reverse=True)
+    return rows
 
 
 def save_project_formulation(

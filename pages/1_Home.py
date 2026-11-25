@@ -49,8 +49,12 @@ with st.container(key="home_layout"):
         with st.popover("New Project", icon=":material/add:", use_container_width=True):
             st.markdown("**Create a new project**")
             with st.form("quick_new_project_form_home", clear_on_submit=True, border=False):
-                new_name = st.text_input("Project name", placeholder="e.g. Lentil protein bar")
-                new_desc = st.text_input("Short description (optional)", placeholder="e.g. High protein, gluten-free snack")
+                new_name = st.text_input("End goal", placeholder="e.g. High-protein millet snack")
+                new_desc = st.text_area(
+                    "Description",
+                    placeholder="e.g. Target nutrition, cost ceiling, regional crops, clean-label goals...",
+                    height=82,
+                )
                 create_btn = st.form_submit_button("Create & Open Workbench", type="primary", use_container_width=True)
 
             if create_btn:
@@ -83,7 +87,7 @@ with st.container(key="home_layout"):
             )
         else:
             st.markdown(
-                '<div class="empty-state">No projects in this lab yet. Click “➕ New Project” above to start your first formulation.</div>',
+                '<div class="empty-state">No projects in this lab yet. Click “New Project” above to start your first formulation.</div>',
                 unsafe_allow_html=True,
             )
     else:
@@ -96,7 +100,7 @@ with st.container(key="home_layout"):
             version_badge = (
                 f'<span class="conf conf-verified" style="margin-left: 0.4rem;">v{saved_meta["version"]} Saved</span>'
                 if saved_meta
-                else '<span class="conf conf-estimated" style="margin-left: 0.4rem;">Draft</span>'
+                else '<span class="conf conf-estimated" style="margin-left: 0.4rem;">No formulation yet</span>'
             )
 
             with st.container(border=True, key=f"pcard_{project['project_id']}", vertical_alignment="center"):

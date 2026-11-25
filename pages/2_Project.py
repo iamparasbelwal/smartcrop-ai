@@ -8,12 +8,13 @@ import streamlit as st
 
 import auth
 import cleanlabel
+import copilot
 import formulations
+import gemini
 import ingredients
 import nutrition
 import projects
 import ui
-import whatif
 
 user = auth.require_login()
 project = projects.active_project(user)
@@ -316,8 +317,7 @@ st.markdown(WORKBENCH_SIDEBAR_CSS, unsafe_allow_html=True)
 OPENING_CHAT = [
     {
         "role": "assistant",
-        "text": "Tell me what to change — more protein, lower cost, less sugar — and I'll rebalance "
-        "the recipe and recompute the panels.",
+        "text": "How can I help you?",
     }
 ]
 
@@ -441,13 +441,201 @@ def _clean_label_html(findings: list[dict]) -> str:
     return "".join(parts)
 
 
-def _chat_html(messages: list[dict]) -> str:
+def _compare_html(rows: list[dict], label_a: str, label_b: str) -> str:
+    cells = []
+    for row in rows:
+        ingredient = row["ingredient"]
+        delta = row["delta"]
+        if abs(delta) < 0.05:
+            pill = '<span class="cat-tag">unchanged</span>'
+        elif delta > 0:
+            pill = f'<span class="conf conf-review">+{delta:.1f}</span>'
+        else:
+            pill = f'<span class="conf conf-verified">{delta:.1f}</span>'
+        cells.append(
+            "<tr>"
+            f"<td><strong>{ui.esc(ingredient['name'])}</strong></td>"
+            f'<td class="num">{row["share_a"]:.1f}%</td>'
+            f'<td class="num">{row["share_b"]:.1f}%</td>'
+            f"<td>{pill}</td>"
+            "</tr>"
+        )
+    return (
+        '<table class="f-table">'
+        "<thead><tr><th>Ingredient</th>"
+        f'<th style="text-align: right;">{ui.esc(label_a)}</th>'
+        f'<th style="text-align: right;">{ui.esc(label_b)}</th>'
+        '<th style="width: 24%;">Change</th></tr></thead>'
+        "<tbody>" + "".join(cells) + "</tbody></table>"
+    )
+
+
+def _skeleton_spec_html() -> str:
+    """Empty formulation wireframe shown before the user prompts Gemini."""
+    kpi_labels = ["Cost / kg", "Protein", "Energy", "Clean Label"]
+    kpis = "".join(
+        f'<div class="skel-kpi-card">'
+        f'<div class="kpi-label">{label}</div>'
+        f'<div class="skel-bar skel-val"></div>'
+        f'<div class="skel-bar skel-sub"></div>'
+        f"</div>"
+        for label in kpi_labels
+    )
+    rows = []
+    widths = [("68%", "52%"), ("58%", "44%"), ("64%", "48%"), ("50%", "38%"), ("55%", "40%")]
+    for idx, (w_name, w_share) in enumerate(widths):
+        opacity = max(0.32, 0.92 - idx * 0.14)
+        rows.append(
+            f'<div class="skel-row" style="opacity: {opacity:.2f};">'
+            f'<div class="skel-cell-name"><div class="skel-bar" style="width: {w_name}; height: 11px;"></div>'
+            f'<div class="skel-bar" style="width: 34%; height: 8px; margin-top: 5px; opacity: 0.7;"></div></div>'
+            f'<div class="skel-cell-cat"><div class="skel-bar" style="width: 58px; height: 18px; border-radius: 999px;"></div></div>'
+            f'<div class="skel-cell-share"><div class="skel-bar" style="width: {w_share}; height: 7px;"></div></div>'
+            f'<div class="skel-cell-num"><div class="skel-bar" style="width: 42px; height: 10px; margin-left: auto;"></div></div>'
+            f"</div>"
+        )
+    return (
+        '<div class="skel-head">'
+        '<div>'
+        '<div style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase;">FORMULATION SPEC</div>'
+        '<span class="conf conf-estimated">Awaiting goals</span>'
+        '</div>'
+        '<div class="skel-actions">'
+        '<div class="skel-btn-ghost"></div>'
+        '<div class="skel-btn-ghost" style="width: 78px;"></div>'
+        '</div>'
+        '</div>'
+        f'<div class="skel-kpi-grid">{kpis}</div>'
+        '<div class="skel-tab-bar">'
+        '<span class="skel-tab active">Formulation</span>'
+        '<span class="skel-tab">Nutrition</span>'
+        '<span class="skel-tab">Cost</span>'
+        '<span class="skel-tab">Additive Check</span>'
+        '<span class="skel-tab">Versions</span>'
+        '</div>'
+        '<div class="skel-table-head">'
+        '<span>Ingredient / Crop</span><span>Category</span><span>Share (%)</span><span style="text-align: right;">₹/100 g</span>'
+        '</div>'
+        + "".join(rows)
+        + '<div class="skel-empty-note">'
+        '<strong>No formulation yet</strong><br>'
+        'Tell me your formulation goals in the chat on the left. Gemini will access your private '
+        'crop database, extract matching ingredients, and build your formulation here.'
+        '</div>'
+    )
+
+
+def _chat_html(messages: list[dict], pending_status: str = "") -> str:
     rows = []
     for message in messages:
         role = "me" if message["role"] == "user" else "ai"
         text = ui.esc(message["text"]).replace("\n", "<br>")
-        rows.append(f'<div class="chat-row {role}"><div class="chat-bubble">{text}</div></div>')
+        meta = ""
+        if role == "ai" and message.get("engine") and message.get("engine") != "SmartCrop co-pilot":
+            meta = f'<span class="chat-meta">{ui.esc(message["engine"])}</span>'
+        if role == "ai" and message.get("thought"):
+            summary_txt = ui.esc(message.get("thought_summary") or "Reviewed crop database & reasoning")
+            thought_txt = ui.esc(message["thought"]).replace("\n", "<br>")
+            rows.append(
+                f'<div class="chat-row ai">'
+                f'<div class="ai-thought-wrap">'
+                f'<details class="ai-thought">'
+                f'<summary><span class="ai-thought-dots"><i></i><i></i><i></i></span>'
+                f'<span>{summary_txt}</span><span class="ai-status-chevron">&rsaquo;</span></summary>'
+                f'<div class="ai-thought-body">{thought_txt}</div>'
+                f'</details>'
+                f'<div class="chat-bubble">{text}{meta}</div>'
+                f'</div>'
+                f'</div>'
+            )
+        else:
+            rows.append(f'<div class="chat-row {role}"><div class="chat-bubble">{text}{meta}</div></div>')
+    if pending_status:
+        rows.append(ui.status_html(pending_status))
     return f'<div class="chat-log">{"".join(rows)}</div>'
+
+
+@st.dialog("Draft a formulation with AI", width="large")
+def ai_draft_dialog(project_name: str, project_id: str) -> None:
+    """M6: a written brief becomes a validated recipe, then a workbench draft."""
+    st.markdown(
+        '<div class="panel-note" style="margin: 0 0 0.9rem;">Describe the product in ordinary '
+        "words. Gemini chooses the crops and their shares from the lab database; SmartCrop then "
+        "checks every id, the practical cap on each crop and the 100 % total before any number "
+        "reaches the screen.</div>",
+        unsafe_allow_html=True,
+    )
+    brief = st.text_area(
+        "What should the product be?",
+        key=f"ai_brief_{project_id}",
+        height=110,
+        placeholder="A high-protein baked snack for school children, as cheap as possible, "
+        "at most 8% jaggery...",
+    )
+    cook = st.selectbox(
+        "How is it made?",
+        ["Baked snack", "Pan-fried flatbread", "Extruded puff", "No-cook energy mix"],
+        key=f"ai_cook_{project_id}",
+    )
+    if st.button("Draft the recipe", type="primary", use_container_width=True):
+        if len(brief.strip()) < 12:
+            st.warning("Write a line or two about the product you want.")
+        else:
+            with st.spinner("Gemini is weighing the crops…"):
+                st.session_state["ai_draft_result"] = copilot.draft(
+                    brief, project_name=project_name, cook=cook
+                )
+            st.session_state["ai_draft_prompt"] = brief.strip()
+
+    result = st.session_state.get("ai_draft_result")
+    if not result:
+        return
+    if not result.get("ok"):
+        st.warning(f"No usable recipe came back — {result.get('reason', 'unknown reason')}")
+        return
+
+    st.markdown(
+        '<div class="panel-label" style="margin-top: 0.9rem;">PROPOSED PRODUCT</div>'
+        f'<div class="panel-title">{ui.esc(result["name"])}</div>'
+        f'<div class="panel-note" style="margin-top: 0;">{ui.esc(result["rationale"])}</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(_rows_html(formulations.resolve(result["items"])), unsafe_allow_html=True)
+
+    blend = result["blend"]
+    st.markdown(
+        '<div class="kpi-strip" style="margin-top: 0.9rem;">'
+        '<div class="kpi-card"><div class="kpi-label">Cost / kg</div>'
+        f'<div class="kpi-value">₹{result["cost"]:,.2f}</div>'
+        '<div class="kpi-note">ingredient cost</div></div>'
+        '<div class="kpi-card"><div class="kpi-label">Protein</div>'
+        f'<div class="kpi-value">{blend["protein_g"]:.1f}g</div>'
+        '<div class="kpi-note">per 100 g</div></div>'
+        '<div class="kpi-card"><div class="kpi-label">Energy</div>'
+        f'<div class="kpi-value">{blend["energy_kcal"]:.0f}</div>'
+        '<div class="kpi-note">kcal / 100 g</div></div>'
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    notes = result.get("notes") or []
+    st.caption(
+        "Checks applied: " + "; ".join(notes)
+        if notes
+        else "All shares passed the id, cap and 100 % checks unchanged."
+    )
+    st.caption(
+        f"Drafted by {result['engine']} from “{st.session_state.get('ai_draft_prompt', '')}”. "
+        "A starting point only — the lab still has to measure the batch."
+    )
+    if st.button("Use this recipe in the workbench", type="primary", use_container_width=True):
+        st.session_state[f"recipe_{project_id}"] = result["items"]
+        st.session_state[f"chat_{project_id}"] = list(OPENING_CHAT)
+        st.session_state.pop(f"explain_{project_id}", None)
+        st.session_state.pop("ai_draft_result", None)
+        st.session_state[f"save_notice_{project_id}"] = (
+            f"Loaded the AI draft “{result['name']}” as an unsaved version. Press Save to keep it."
+        )
+        st.rerun()
 
 
 with st.container(key="wb-head"):
@@ -467,39 +655,42 @@ recipe_key = f"recipe_{project['project_id']}"
 chat_key = f"chat_{project['project_id']}"
 
 saved_meta, saved_items = formulations.get_latest_project_formulation(project["project_id"])
+versions = formulations.list_project_formulations(project["project_id"])
 if recipe_key not in st.session_state:
     st.session_state[recipe_key] = saved_items
 
-recipe_items = st.session_state.get(recipe_key) or saved_items
+recipe_items = st.session_state.get(recipe_key) or []
+has_formulation = bool(recipe_items)
 messages = st.session_state.get(chat_key) or list(OPENING_CHAT)
-recipe = formulations.resolve(recipe_items)
 catalog_size = len(ingredients.list_ingredients())
-blend = nutrition.blend_nutrition(recipe)
-blend_cost = nutrition.cost_per_kg(recipe)
-baseline_cost = nutrition.cost_per_kg(formulations.reference_base())
-serving_cost = nutrition.cost_per_serving(recipe)
-quality = nutrition.confidence_counts(recipe)
-findings = cleanlabel.check(recipe)
 
-# Build the lab spec sheet markdown for export
-spec_sheet_md = formulations.build_lab_spec_sheet(
-    project=project,
-    recipe_rows=recipe,
-    blend_nutrition=blend,
-    blend_cost=blend_cost,
-    baseline_cost=baseline_cost,
-    serving_cost=serving_cost,
-    findings=findings,
-    formulation_meta=saved_meta,
-)
+if has_formulation:
+    recipe = formulations.resolve(recipe_items)
+    blend = nutrition.blend_nutrition(recipe)
+    blend_cost = nutrition.cost_per_kg(recipe)
+    baseline_cost = nutrition.cost_per_kg(formulations.reference_base())
+    serving_cost = nutrition.cost_per_serving(recipe)
+    quality = nutrition.confidence_counts(recipe)
+    findings = cleanlabel.check(recipe)
 
-delta_pct = (blend_cost - baseline_cost) / baseline_cost * 100 if baseline_cost else 0.0
-if abs(delta_pct) < 1:
-    delta_text, delta_class = "in line with the reference base", "cost-delta"
-elif delta_pct < 0:
-    delta_text, delta_class = f"{abs(delta_pct):.0f}% below the reference base", "cost-delta"
-else:
-    delta_text, delta_class = f"{abs(delta_pct):.0f}% above the reference base", "cost-delta up"
+    spec_sheet_md = formulations.build_lab_spec_sheet(
+        project=project,
+        recipe_rows=recipe,
+        blend_nutrition=blend,
+        blend_cost=blend_cost,
+        baseline_cost=baseline_cost,
+        serving_cost=serving_cost,
+        findings=findings,
+        formulation_meta=saved_meta,
+    )
+
+    delta_pct = (blend_cost - baseline_cost) / baseline_cost * 100 if baseline_cost else 0.0
+    if abs(delta_pct) < 1:
+        delta_text, delta_class = "in line with the reference base", "cost-delta"
+    elif delta_pct < 0:
+        delta_text, delta_class = f"{abs(delta_pct):.0f}% below the reference base", "cost-delta"
+    else:
+        delta_text, delta_class = f"{abs(delta_pct):.0f}% above the reference base", "cost-delta up"
 
 save_notice = st.session_state.pop(f"save_notice_{project['project_id']}", "")
 if save_notice:
@@ -510,34 +701,53 @@ left, right = st.columns([1.38, 1.0], gap="large")
 with left:
     with st.container(border=True, key="panel_chat"):
         st.markdown(
-            '<div class="chat-header">'
+            '<div class="chat-head">'
+            "<div>"
             '<div class="panel-label">SMARTCROP CO-PILOT</div>'
-            '<div class="panel-title" style="margin-bottom: 0;">Chat Assistant</div>'
+            '<div class="panel-title" style="margin-bottom: 0;">Formulation assistant</div>'
+            "</div>"
+            f'<span class="chat-engine">{ui.esc(gemini.status_label())}</span>'
             "</div>",
             unsafe_allow_html=True,
         )
-        st.markdown(_chat_html(messages), unsafe_allow_html=True)
+        chat_slot = st.empty()
+        chat_slot.markdown(_chat_html(messages), unsafe_allow_html=True)
+        ui.autoscroll()
 
-        st.markdown('<div class="chat-chips-label">Quick Prompts</div>', unsafe_allow_html=True)
+        st.markdown('<div class="chat-chips-label">Quick prompts</div>', unsafe_allow_html=True)
         prompt_cols = st.columns(4)
-        prompts = [
-            ("More protein", "more protein", ":material/bolt:"),
-            ("Lower cost", "lower cost", ":material/trending_down:"),
-            ("More millet", "more millet", ":material/grass:"),
-            ("Less sugar", "less sweet", ":material/water_drop:"),
-        ]
+        if has_formulation:
+            prompts = [
+                ("More protein", "more protein", ":material/bolt:"),
+                ("Lower cost", "lower cost", ":material/trending_down:"),
+                ("More millet", "more millet", ":material/grass:"),
+                ("Less sugar", "less sweet", ":material/water_drop:"),
+            ]
+        else:
+            prompts = [
+                ("High protein", "Create a high-protein formulation from the private crop database for this project goal.", ":material/bolt:"),
+                ("Low cost", "Create an affordable, cost-optimized formulation using local crops from the database.", ":material/trending_down:"),
+                ("Millet base", "Build a millet-rich clean-label formulation using local crops from the database.", ":material/grass:"),
+                ("Low sugar", "Build a low-sugar clean-label plant formulation using ingredients from the database.", ":material/water_drop:"),
+            ]
         clicked_prompt = None
-        for pcol, (plabel, pcmd, picon) in zip(prompt_cols, prompts):
-            if pcol.button(plabel, icon=picon, key=f"qp_{pcmd}", use_container_width=True):
+        for idx, (pcol, (plabel, pcmd, picon)) in enumerate(zip(prompt_cols, prompts)):
+            if pcol.button(
+                plabel,
+                icon=picon,
+                key=f"qp_{'edit' if has_formulation else 'empty'}_{idx}",
+                use_container_width=True,
+            ):
                 clicked_prompt = pcmd
 
+        input_placeholder = "Describe your formulation goals"
         with st.form("workbench_chat_form", clear_on_submit=True, border=False):
             input_column, send_column = st.columns([4.2, 1.2], vertical_alignment="center")
             with input_column:
                 instruction = st.text_input(
                     "Instruction",
                     key="workbench_chat_input",
-                    placeholder="e.g. More protein, lower cost, less sugar, swap soy for chickpea...",
+                    placeholder=input_placeholder,
                     label_visibility="collapsed",
                 )
             with send_column:
@@ -545,153 +755,306 @@ with left:
 
         action_instruction = clicked_prompt or (instruction.strip() if sent else None)
         if action_instruction:
-            new_items, reply, changed = whatif.apply(recipe_items, action_instruction)
-            messages = messages + [
-                {"role": "user", "text": action_instruction},
-                {"role": "assistant", "text": reply},
+            pending_messages = messages + [{"role": "user", "text": action_instruction}]
+            chat_slot.markdown(
+                _chat_html(
+                    pending_messages,
+                    pending_status="Searching private crop & additive database",
+                ),
+                unsafe_allow_html=True,
+            )
+            db_ctx = copilot.prepare_db_context(
+                action_instruction,
+                project_name=project["name"],
+                project_description=project.get("description", ""),
+            )
+            chat_slot.markdown(
+                _chat_html(
+                    pending_messages,
+                    pending_status=f"Evaluating {db_ctx['crop_count']} database crops & formulating blend",
+                ),
+                unsafe_allow_html=True,
+            )
+            answer = copilot.chat(
+                recipe_items,
+                action_instruction,
+                project_name=project["name"],
+                project_description=project.get("description", ""),
+                db_brief=str(db_ctx["summary"]),
+                history=messages,
+            )
+            chat_slot.markdown(
+                _chat_html(
+                    pending_messages,
+                    pending_status="Computing verified nutrition, cost & clean-label metrics",
+                ),
+                unsafe_allow_html=True,
+            )
+            messages = pending_messages + [
+                {
+                    "role": "assistant",
+                    "text": answer["reply"],
+                    "engine": answer["engine"],
+                    "thought": answer.get("thought", ""),
+                    "thought_summary": answer.get("thought_summary", ""),
+                },
             ]
             st.session_state[chat_key] = messages[-30:]
-            if changed:
-                st.session_state[recipe_key] = new_items
+            if answer["items"]:
+                st.session_state[recipe_key] = answer["items"]
+                st.session_state.pop(f"explain_{project['project_id']}", None)
+                st.session_state.pop(f"cl_explain_{project['project_id']}", None)
             st.rerun()
 
 with right:
     with st.container(border=True, key="panel_spec"):
-        status_label = f"v{saved_meta['version']} (Saved)" if saved_meta else "Draft (Unsaved)"
-        status_badge_class = "conf-verified" if saved_meta else "conf-estimated"
-
-        top_info, top_actions = st.columns([1.1, 2.3], vertical_alignment="center")
-        with top_info:
-            st.markdown(
-                f'<div style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase;">FORMULATION SPEC</div>'
-                f'<span class="conf {status_badge_class}">{status_label}</span>',
-                unsafe_allow_html=True,
-            )
-        with top_actions:
-            b1, b2, b3 = st.columns([1.0, 1.3, 0.9])
-            with b1:
-                if st.button("Save", key="save_form_btn", type="primary", use_container_width=True):
-                    ok, msg, form_id = formulations.save_project_formulation(
-                        project_id=project["project_id"],
-                        items=recipe_items,
-                        user_id=user["user_id"],
-                    )
-                    if ok:
-                        st.session_state[f"save_notice_{project['project_id']}"] = msg
-                        st.rerun()
-                    else:
-                        st.error(msg)
-            with b2:
-                st.download_button(
-                    "Export Spec",
-                    data=spec_sheet_md,
-                    file_name=f"smartcrop_lab_spec_{project['project_id']}.md",
-                    mime="text/markdown",
-                    key="download_spec_btn",
-                    use_container_width=True,
-                )
-            with b3:
-                if st.button("Reset", key="reset_recipe_btn", use_container_width=True):
-                    st.session_state[recipe_key] = formulations.starter_items()
-                    st.session_state[chat_key] = list(OPENING_CHAT)
-                    st.session_state[f"save_notice_{project['project_id']}"] = "Reset to default starter recipe."
-                    st.rerun()
-
-        st.write("")
-
-        # Clean label summary for KPI strip
-        flagged = sum(1 for finding in findings if finding["status"] == "flagged")
-        review = len(findings) - flagged
-        if flagged:
-            verdict_short, verdict_sub = f"{flagged} Flagged", "Needs replacement"
-        elif review:
-            verdict_short, verdict_sub = f"{review} Review", "Confirm source"
+        if not has_formulation:
+            st.markdown(_skeleton_spec_html(), unsafe_allow_html=True)
         else:
-            verdict_short, verdict_sub = "Clean", "0 synthetic additives"
+            status_label = f"v{saved_meta['version']} (Saved)" if saved_meta else "Draft (Unsaved)"
+            status_badge_class = "conf-verified" if saved_meta else "conf-estimated"
 
-        # KPI Strip
-        st.markdown(
-            f'<div class="kpi-strip">'
-            f'<div class="kpi-card">'
-            f'<div class="kpi-label">Cost / kg</div>'
-            f'<div class="kpi-value">₹{blend_cost:,.2f}</div>'
-            f'<div class="kpi-note">{delta_text}</div>'
-            f'</div>'
-            f'<div class="kpi-card">'
-            f'<div class="kpi-label">Protein</div>'
-            f'<div class="kpi-value">{blend["protein_g"]:.1f}g</div>'
-            f'<div class="kpi-note">per 100g blend</div>'
-            f'</div>'
-            f'<div class="kpi-card">'
-            f'<div class="kpi-label">Energy</div>'
-            f'<div class="kpi-value">{blend["energy_kcal"]:.0f}</div>'
-            f'<div class="kpi-note">kcal / 100g</div>'
-            f'</div>'
-            f'<div class="kpi-card">'
-            f'<div class="kpi-label">Clean Label</div>'
-            f'<div class="kpi-value">{verdict_short}</div>'
-            f'<div class="kpi-note">{verdict_sub}</div>'
-            f'</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+            top_info, top_actions = st.columns([1.1, 2.3], vertical_alignment="center")
+            with top_info:
+                st.markdown(
+                    f'<div style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase;">FORMULATION SPEC</div>'
+                    f'<span class="conf {status_badge_class}">{status_label}</span>',
+                    unsafe_allow_html=True,
+                )
+            with top_actions:
+                b1, b2, b3, b4 = st.columns([0.8, 1.1, 0.75, 1.05])
+                with b1:
+                    if st.button("Save", key="save_form_btn", type="primary", use_container_width=True):
+                        ok, msg, form_id = formulations.save_project_formulation(
+                            project_id=project["project_id"],
+                            items=recipe_items,
+                            user_id=user["user_id"],
+                        )
+                        if ok:
+                            st.session_state[f"save_notice_{project['project_id']}"] = msg
+                            st.rerun()
+                        else:
+                            st.error(msg)
+                with b2:
+                    st.download_button(
+                        "Export Spec",
+                        data=spec_sheet_md,
+                        file_name=f"smartcrop_lab_spec_{project['project_id']}.md",
+                        mime="text/markdown",
+                        key="download_spec_btn",
+                        use_container_width=True,
+                    )
+                with b3:
+                    if st.button("Reset", key="reset_recipe_btn", use_container_width=True):
+                        st.session_state[recipe_key] = []
+                        st.session_state[chat_key] = list(OPENING_CHAT)
+                        st.session_state.pop(f"explain_{project['project_id']}", None)
+                        st.session_state.pop(f"cl_explain_{project['project_id']}", None)
+                        st.session_state[f"save_notice_{project['project_id']}"] = "Cleared formulation back to empty skeleton."
+                        st.rerun()
+                with b4:
+                    if st.button(
+                        "AI draft",
+                        key="ai_draft_btn",
+                        icon=":material/auto_awesome:",
+                        use_container_width=True,
+                    ):
+                        st.session_state.pop("ai_draft_result", None)
+                        ai_draft_dialog(project["name"], project["project_id"])
 
-        # Tabbed detail tables
-        tab_recipe, tab_nutrition, tab_cost, tab_clean = st.tabs(
-            [
-                ":material/science: Formulation",
-                ":material/bar_chart: Nutrition",
-                ":material/payments: Cost",
-                ":material/eco: Additive Check",
-            ]
-        )
+            st.write("")
 
-        with tab_recipe:
-            st.markdown(_rows_html(recipe, blend_cost=blend_cost), unsafe_allow_html=True)
+            # Clean label summary for KPI strip
+            flagged = sum(1 for finding in findings if finding["status"] == "flagged")
+            review = len(findings) - flagged
+            if flagged:
+                verdict_short, verdict_sub = f"{flagged} Flagged", "Needs replacement"
+            elif review:
+                verdict_short, verdict_sub = f"{review} Review", "Confirm source"
+            else:
+                verdict_short, verdict_sub = "Clean", "0 synthetic additives"
+
+            # KPI Strip
             st.markdown(
-                f'<div class="panel-note" style="margin-top: 0.6rem;">{len(recipe)} ingredients from the local crop database '
-                f"({catalog_size} seeded). Composition and prices are marked estimated until the lab "
-                "verifies them. The recipe updates live with every chat response.</div>",
+                f'<div class="kpi-strip">'
+                f'<div class="kpi-card">'
+                f'<div class="kpi-label">Cost / kg</div>'
+                f'<div class="kpi-value">₹{blend_cost:,.2f}</div>'
+                f'<div class="kpi-note">{delta_text}</div>'
+                f'</div>'
+                f'<div class="kpi-card">'
+                f'<div class="kpi-label">Protein</div>'
+                f'<div class="kpi-value">{blend["protein_g"]:.1f}g</div>'
+                f'<div class="kpi-note">per 100g blend</div>'
+                f'</div>'
+                f'<div class="kpi-card">'
+                f'<div class="kpi-label">Energy</div>'
+                f'<div class="kpi-value">{blend["energy_kcal"]:.0f}</div>'
+                f'<div class="kpi-note">kcal / 100g</div>'
+                f'</div>'
+                f'<div class="kpi-card">'
+                f'<div class="kpi-label">Clean Label</div>'
+                f'<div class="kpi-value">{verdict_short}</div>'
+                f'<div class="kpi-note">{verdict_sub}</div>'
+                f'</div>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
 
-        with tab_nutrition:
-            st.markdown(_nutrition_html(blend), unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="panel-note" style="margin-top: 0.6rem;">Computed from the ingredient table. '
-                f"{quality['estimated']} of {len(recipe)} rows estimated"
-                + (f", {quality['unknown']} unknown" if quality["unknown"] else "")
-                + (f", {quality['verified']} verified" if quality["verified"] else "")
-                + ".</div>",
-                unsafe_allow_html=True,
+            # Tabbed detail tables
+            tab_recipe, tab_nutrition, tab_cost, tab_clean, tab_versions = st.tabs(
+                [
+                    ":material/science: Formulation",
+                    ":material/bar_chart: Nutrition",
+                    ":material/payments: Cost",
+                    ":material/eco: Additive Check",
+                    ":material/history: Versions",
+                ]
             )
 
-        with tab_cost:
-            st.markdown(
-                f'<div class="cost-big">₹{blend_cost:,.2f}<span class="cost-unit">per kg</span></div>'
-                f'<span class="{delta_class}">{delta_text}</span>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                '<div class="cost-line" style="margin-top: 0.8rem;"><span>Reference base</span>'
-                f'<span>₹{baseline_cost:,.2f} / kg</span></div>'
-                f'<div class="cost-line"><span>Per {nutrition.SERVING_GRAMS} g serving</span>'
-                f'<span>₹{serving_cost:,.2f}</span></div>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                '<div class="panel-note" style="margin-top: 0.6rem;">Ingredient cost only, from mandi prices dated '
-                "2026-11-20; labour, packaging and losses are not included. The reference base is a "
-                "plain wheat-atta snack costed from the same table.</div>",
-                unsafe_allow_html=True,
-            )
+            with tab_recipe:
+                st.markdown(_rows_html(recipe, blend_cost=blend_cost), unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="panel-note" style="margin-top: 0.6rem;">{len(recipe)} ingredients from the local crop database '
+                    f"({catalog_size} seeded). Composition and prices are marked estimated until the lab "
+                    "verifies them. The recipe updates live with every chat response.</div>",
+                    unsafe_allow_html=True,
+                )
 
-        with tab_clean:
-            st.markdown(_clean_label_html(findings), unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="panel-note" style="margin-top: 0.6rem;">Checked against a watchlist of '
-                f"{len(cleanlabel.watchlist())} synthetic terms and each ingredient's clean-label "
-                "flag. Natural crop replacements are recommended automatically.</div>",
-                unsafe_allow_html=True,
-            )
+            with tab_nutrition:
+                st.markdown(_nutrition_html(blend), unsafe_allow_html=True)
+                explain_key = f"explain_{project['project_id']}"
+                if st.button(
+                    "Explain this blend",
+                    key="explain_blend_btn",
+                    icon=":material/auto_awesome:",
+                    width="stretch",
+                ):
+                    with st.spinner("Reading the blend…"):
+                        try:
+                            st.session_state[explain_key] = copilot.explain_blend(recipe_items)
+                        except gemini.GeminiError as exc:
+                            st.warning(str(exc))
+                if st.session_state.get(explain_key):
+                    st.markdown(ui.ai_note(st.session_state[explain_key]), unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="panel-note" style="margin-top: 0.6rem;">Computed from the ingredient table. '
+                    f"{quality['estimated']} of {len(recipe)} rows estimated"
+                    + (f", {quality['unknown']} unknown" if quality["unknown"] else "")
+                    + (f", {quality['verified']} verified" if quality["verified"] else "")
+                    + ".</div>",
+                    unsafe_allow_html=True,
+                )
+
+            with tab_cost:
+                st.markdown(
+                    f'<div class="cost-big">₹{blend_cost:,.2f}<span class="cost-unit">per kg</span></div>'
+                    f'<span class="{delta_class}">{delta_text}</span>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    '<div class="cost-line" style="margin-top: 0.8rem;"><span>Reference base</span>'
+                    f'<span>₹{baseline_cost:,.2f} / kg</span></div>'
+                    f'<div class="cost-line"><span>Per {nutrition.SERVING_GRAMS} g serving</span>'
+                    f'<span>₹{serving_cost:,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    '<div class="panel-note" style="margin-top: 0.6rem;">Ingredient cost only, from mandi prices dated '
+                    "2026-11-20; labour, packaging and losses are not included. The reference base is a "
+                    "plain wheat-atta snack costed from the same table.</div>",
+                    unsafe_allow_html=True,
+                )
+
+            with tab_clean:
+                st.markdown(_clean_label_html(findings), unsafe_allow_html=True)
+                cl_key = f"cl_explain_{project['project_id']}"
+                if findings and st.button(
+                    "What do these ingredients do?",
+                    key="cl_explain_btn",
+                    icon=":material/auto_awesome:",
+                    width="stretch",
+                ):
+                    with st.spinner("Gemini is reading the watchlist…"):
+                        try:
+                            st.session_state[cl_key] = copilot.explain_clean_label(findings)
+                        except gemini.GeminiError as exc:
+                            st.warning(str(exc))
+                if st.session_state.get(cl_key):
+                    st.markdown(ui.ai_note(st.session_state[cl_key]), unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="panel-note" style="margin-top: 0.6rem;">Checked against a watchlist of '
+                    f"{len(cleanlabel.watchlist())} synthetic terms and each ingredient's clean-label "
+                    "flag. Natural crop replacements are recommended automatically.</div>",
+                    unsafe_allow_html=True,
+                )
+
+            with tab_versions:
+                if not versions:
+                    st.markdown(
+                        '<div class="panel-note">No saved versions yet. Press Save to create v1 — every '
+                        "later save adds another version, and this tab compares any two of them.</div>",
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    version_labels = [
+                        f"v{version['version']} · {version['created_at'][:16]}" for version in versions
+                    ]
+                    pick_a, pick_b = st.columns(2)
+                    label_a = pick_a.selectbox(
+                        "Version A",
+                        version_labels,
+                        index=min(1, len(version_labels) - 1),
+                        key=f"cmp_a_{project['project_id']}",
+                    )
+                    label_b = pick_b.selectbox(
+                        "Version B",
+                        version_labels,
+                        index=0,
+                        key=f"cmp_b_{project['project_id']}",
+                    )
+                    items_a = formulations.formulation_items(
+                        versions[version_labels.index(label_a)]["formulation_id"]
+                    )
+                    items_b = formulations.formulation_items(
+                        versions[version_labels.index(label_b)]["formulation_id"]
+                    )
+                    blend_a = nutrition.blend_nutrition(formulations.resolve(items_a))
+                    blend_b = nutrition.blend_nutrition(formulations.resolve(items_b))
+                    cost_a = nutrition.cost_per_kg(formulations.resolve(items_a))
+                    cost_b = nutrition.cost_per_kg(formulations.resolve(items_b))
+
+                    def _movement(before: float, after: float, label: str, decimals: int = 1) -> str:
+                        diff = after - before
+                        tone = "cost-delta up" if diff > 0 else "cost-delta"
+                        return (
+                            f'<div class="stat-row"><span class="stat-label">{ui.esc(label)}</span>'
+                            f'<span class="stat-value">{before:,.{decimals}f} → {after:,.{decimals}f}'
+                            f' <span class="{tone}" style="font-size: 0.66rem;">'
+                            f"{diff:+,.{decimals}f}</span></span></div>"
+                        )
+
+                    st.markdown(
+                        _movement(blend_a["protein_g"], blend_b["protein_g"], "Protein (g / 100 g)")
+                        + _movement(
+                            blend_a["energy_kcal"], blend_b["energy_kcal"], "Energy (kcal / 100 g)", 0
+                        )
+                        + _movement(cost_a, cost_b, "Cost (₹ / kg)", 2),
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown(
+                        _compare_html(formulations.compare_items(items_a, items_b), label_a, label_b),
+                        unsafe_allow_html=True,
+                    )
+                    if st.button(
+                        f"Load {label_b} into the workbench",
+                        key=f"load_cmp_{project['project_id']}",
+                        width="stretch",
+                    ):
+                        st.session_state[recipe_key] = items_b
+                        st.session_state[chat_key] = list(OPENING_CHAT)
+                        st.session_state[f"save_notice_{project['project_id']}"] = (
+                            f"Loaded {label_b} into the workbench. Save to keep it as a new version."
+                        )
+                        st.rerun()
 

@@ -18,7 +18,7 @@ PROJECT_FIELDS = [
     "created_at",
     "updated_at",
 ]
-MAX_NAME_LENGTH = 80
+MAX_NAME_LENGTH = 120
 
 
 def bootstrap() -> None:
@@ -53,9 +53,9 @@ def create_project(name: str, description: str, user: dict[str, str]) -> tuple[b
     description = (description or "").strip()
 
     if not name:
-        return False, "Give the project a name.", ""
+        return False, "Enter an end goal for the project.", ""
     if len(name) > MAX_NAME_LENGTH:
-        return False, f"Keep the project name under {MAX_NAME_LENGTH} characters.", ""
+        return False, f"Keep the end goal under {MAX_NAME_LENGTH} characters.", ""
 
     rows = read_csv(PROJECTS_CSV, PROJECT_FIELDS)
     same_lab = [project for project in rows if project["lab_id"] == user["lab_id"]]
