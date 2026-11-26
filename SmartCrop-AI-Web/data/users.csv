@@ -1,0 +1,4 @@
+user_id,lab_id,name,email,role,password_hash,active,created_at,last_login_at
+U-001,LAB-001,Paras Belwal,paras@smartcrop.ai,lab_admin,scrypt$16384$8$1$447ee8f457cc5284584ac20102da82cf$0c3a3d00484d5052e78344b479ec33ee5eabc1940c2adc090cd394b2551dd1f3,yes,2026-11-24 13:05:59,2026-11-26 16:35:59
+U-002,LAB-001,Shivam,shivam@smartcrop.ai,lab_worker,scrypt$16384$8$1$1de084a81dd812c1fe541229d2ec8b21$54b24f29cd0f2ba21f93ee330de507016b741729b69cdf778ef01c40149769e1,yes,2026-11-24 13:05:59,2026-11-26 10:49:11
+U-003,LAB-001,Shreyshi Bijalwan,shreyshi@smartcrop.ai,lab_worker,scrypt$16384$8$1$62f42adcaaf7bdad676341778cd67dc4$7c7cebd5989da7fdd36935ee367e45627978d3c6df3cad94fadc7fadddbb5119,yes,2026-11-24 13:05:59,

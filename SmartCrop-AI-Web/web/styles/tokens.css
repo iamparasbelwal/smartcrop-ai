@@ -1,0 +1,179 @@
+/* ==========================================================================
+   SmartCrop.AI — Design System Tokens
+   Light scientific SaaS theme with forest green, emerald, and subtle lime
+   ========================================================================== */
+
+:root {
+  /* Surfaces (Light Botanical Alabaster) */
+  --bg-canvas: #f4f8f5;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #eff6f1;
+  --bg-surface-muted: #e6f0ea;
+  --bg-glass: rgba(255, 255, 255, 0.72);
+  --bg-glass-strong: rgba(255, 255, 255, 0.86);
+  --bg-glass-tint: rgba(236, 253, 245, 0.62);
+
+  /* Brand Palette: Forest Green -> Emerald -> Subtle Lime */
+  --forest-950: #072219;
+  --forest-900: #0f3d2e;
+  --forest-800: #14533d;
+  --emerald-700: #047857;
+  --emerald-600: #059669;
+  --emerald-500: #10b981;
+  --emerald-200: #a7f3d0;
+  --emerald-100: #d1fae5;
+  --emerald-50: #ecfdf5;
+
+  --lime-500: #84cc16;
+  --lime-400: #a3e635;
+  --lime-300: #bef264;
+  --lime-100: #ecfccb;
+  --lime-50: #f7fee7;
+
+  /* Text Hierarchy */
+  --text-primary: #0b251c;
+  --text-secondary: #3b594e;
+  --text-muted: #678378;
+  --text-faint: #93aba1;
+
+  /* Borders & Hairlines */
+  --border-subtle: rgba(15, 61, 46, 0.08);
+  --border-default: rgba(15, 61, 46, 0.13);
+  --border-strong: rgba(5, 150, 105, 0.28);
+  --border-dashed: rgba(15, 61, 46, 0.18);
+  --border-glass: rgba(255, 255, 255, 0.85);
+
+  /* Shadows & Elevation */
+  --shadow-xs: 0 1px 2px rgba(7, 34, 25, 0.04);
+  --shadow-sm: 0 4px 14px -2px rgba(15, 61, 46, 0.06), 0 1px 3px rgba(15, 61, 46, 0.04);
+  --shadow-md: 0 12px 32px -6px rgba(15, 61, 46, 0.09), 0 2px 6px rgba(15, 61, 46, 0.04);
+  --shadow-lg: 0 24px 48px -12px rgba(7, 34, 25, 0.14);
+  --shadow-glow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+  --shadow-lime-glow: 0 0 14px rgba(132, 204, 22, 0.38);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-pill: 9999px;
+
+  /* Layout Dimensions */
+  --rail-collapsed: 72px;
+  --rail-expanded: 256px;
+  --topbar-height: 64px;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-fast: 160ms;
+  --dur-base: 260ms;
+  --dur-slow: 420ms;
+
+  /* Botanical Leaf Cursors (24x24 SVG, hotspot at leaf tip 3,3) */
+  --cursor-leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 3C11 3.5 18 8.5 19.5 17C12.5 17.8 6.5 13 3 3Z' fill='%23059669' stroke='%230F3D2E' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M4.5 4.5L15 13.5' stroke='%23A3E635' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M19.5 17L21.5 19.5' stroke='%230F3D2E' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") 3 3, auto;
+  --cursor-leaf-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 3C11 3.5 18 8.5 19.5 17C12.5 17.8 6.5 13 3 3Z' fill='%23A3E635' stroke='%230F3D2E' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M4.5 4.5L15 13.5' stroke='%230F3D2E' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M19.5 17L21.5 19.5' stroke='%230F3D2E' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") 3 3, pointer;
+
+  /* Active Studio Mode Theme Tokens (Default: Botanical Emerald) */
+  --mode-deepest: #072219;
+  --mode-deep: #0f3d2e;
+  --mode-accent-700: #047857;
+  --mode-accent-600: #059669;
+  --mode-accent-500: #10b981;
+  --mode-accent-soft: #ecfdf5;
+  --mode-accent-subtle: #eff6f1;
+  --mode-highlight: #a3e635;
+  --mode-highlight-strong: #84cc16;
+  --mode-highlight-soft: #f7fee7;
+  --mode-highlight-border: rgba(132, 204, 22, 0.34);
+  --mode-orb-a: rgba(16, 185, 129, 0.22);
+  --mode-orb-b: rgba(163, 230, 53, 0.2);
+  --mode-orb-c: rgba(15, 61, 46, 0.1);
+  --mode-border-subtle: rgba(15, 61, 46, 0.08);
+  --mode-border-strong: rgba(5, 150, 105, 0.28);
+  --mode-border-dashed: rgba(15, 61, 46, 0.18);
+  --mode-glow-ring: rgba(16, 185, 129, 0.14);
+  --mode-shadow-accent: rgba(15, 61, 46, 0.34);
+  --mode-pulse-rgba: rgba(132, 204, 22, 0.55);
+}
+
+/* Studio Mode: Crop Research (Scientific Blue) */
+body[data-studio-mode="crop-research"] {
+  --bg-canvas: #f2f7fb;
+  --mode-deepest: #082032;
+  --mode-deep: #0c3554;
+  --mode-accent-700: #0369a1;
+  --mode-accent-600: #0284c7;
+  --mode-accent-500: #0ea5e9;
+  --mode-accent-soft: #f0f9ff;
+  --mode-accent-subtle: #eaf3fa;
+  --mode-highlight: #38bdf8;
+  --mode-highlight-strong: #06b6d4;
+  --mode-highlight-soft: #ecfeff;
+  --mode-highlight-border: rgba(6, 182, 212, 0.34);
+  --mode-orb-a: rgba(14, 165, 233, 0.2);
+  --mode-orb-b: rgba(34, 211, 238, 0.18);
+  --mode-orb-c: rgba(12, 53, 84, 0.09);
+  --mode-border-subtle: rgba(12, 53, 84, 0.09);
+  --mode-border-strong: rgba(2, 132, 199, 0.3);
+  --mode-border-dashed: rgba(12, 53, 84, 0.18);
+  --mode-glow-ring: rgba(14, 165, 233, 0.14);
+  --mode-shadow-accent: rgba(12, 53, 84, 0.32);
+  --mode-pulse-rgba: rgba(56, 189, 248, 0.55);
+}
+
+/* Studio Mode: Nutrition & Clean Label (Warm Amber / Gold) */
+body[data-studio-mode="nutrition"] {
+  --bg-canvas: #fbf8f1;
+  --mode-deepest: #2d1805;
+  --mode-deep: #4b2809;
+  --mode-accent-700: #b45309;
+  --mode-accent-600: #d97706;
+  --mode-accent-500: #f59e0b;
+  --mode-accent-soft: #fffbeb;
+  --mode-accent-subtle: #f8f2e4;
+  --mode-highlight: #fbbf24;
+  --mode-highlight-strong: #eab308;
+  --mode-highlight-soft: #fefce8;
+  --mode-highlight-border: rgba(234, 179, 8, 0.36);
+  --mode-orb-a: rgba(245, 158, 11, 0.18);
+  --mode-orb-b: rgba(251, 191, 36, 0.2);
+  --mode-orb-c: rgba(75, 40, 9, 0.08);
+  --mode-border-subtle: rgba(75, 40, 9, 0.09);
+  --mode-border-strong: rgba(217, 119, 6, 0.3);
+  --mode-border-dashed: rgba(75, 40, 9, 0.18);
+  --mode-glow-ring: rgba(245, 158, 11, 0.14);
+  --mode-shadow-accent: rgba(75, 40, 9, 0.3);
+  --mode-pulse-rgba: rgba(251, 191, 36, 0.55);
+}
+
+/* Studio Mode: Optimization (Futuristic Violet) */
+body[data-studio-mode="optimization"] {
+  --bg-canvas: #f6f4fb;
+  --mode-deepest: #1e0f3d;
+  --mode-deep: #341a66;
+  --mode-accent-700: #6d28d9;
+  --mode-accent-600: #7c3aed;
+  --mode-accent-500: #8b5cf6;
+  --mode-accent-soft: #f5f3ff;
+  --mode-accent-subtle: #efeafd;
+  --mode-highlight: #c084fc;
+  --mode-highlight-strong: #a855f7;
+  --mode-highlight-soft: #faf5ff;
+  --mode-highlight-border: rgba(168, 85, 247, 0.34);
+  --mode-orb-a: rgba(139, 92, 246, 0.2);
+  --mode-orb-b: rgba(192, 132, 252, 0.2);
+  --mode-orb-c: rgba(52, 26, 102, 0.09);
+  --mode-border-subtle: rgba(52, 26, 102, 0.09);
+  --mode-border-strong: rgba(124, 58, 237, 0.3);
+  --mode-border-dashed: rgba(52, 26, 102, 0.18);
+  --mode-glow-ring: rgba(139, 92, 246, 0.15);
+  --mode-shadow-accent: rgba(52, 26, 102, 0.32);
+  --mode-pulse-rgba: rgba(192, 132, 252, 0.55);
+}

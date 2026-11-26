@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartCrop.AI — Plant-Based Food Formulation Co-Pilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/app-extensions.css" />
+</head>
+
+<body>
+  <!-- Subtle ambient botanical-scientific background layer -->
+  <div class="ambient-canvas" aria-hidden="true">
+    <div class="ambient-orb orb-emerald"></div>
+    <div class="ambient-orb orb-lime"></div>
+    <div class="ambient-orb orb-forest"></div>
+    <div class="ambient-grid"></div>
+  </div>
+
+  <div class="app-shell" id="app-shell" data-nav-expanded="false">
+    <!-- Mobile Backdrop -->
+    <div class="nav-backdrop" id="nav-backdrop" aria-hidden="true"></div>
+
+    <!-- Minimal Collapsible Dot / Hamburger Navigation Rail -->
+    <aside class="nav-rail glass-surface" id="nav-rail" aria-label="Primary Navigation">
+      <div class="nav-rail-header">
+        <button class="nav-toggle-btn" id="nav-toggle-btn" type="button" aria-expanded="false" aria-controls="nav-rail"
+          title="Toggle navigation menu">
+          <span class="dot-hamburger" aria-hidden="true">
+            <span class="dh-dot dh-1"></span>
+            <span class="dh-dot dh-2"></span>
+            <span class="dh-dot dh-3"></span>
+            <span class="dh-dot dh-4"></span>
+            <span class="dh-dot dh-5"></span>
+            <span class="dh-dot dh-6"></span>
+          </span>
+          <span class="nav-toggle-label">Menu</span>
+        </button>
+      </div>
+
+      <div class="nav-brand-row" id="nav-brand-row">
+        <div class="brand-emblem" aria-hidden="true">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="10" fill="url(#sc-brand-grad)" />
+            <path
+              d="M18 8C13 11.2 10.5 15.8 11.5 21.2C12.2 24.8 14.8 27.2 18 28C21.2 27.2 23.8 24.8 24.5 21.2C25.5 15.8 23 11.2 18 8Z"
+              stroke="#ECFDF5" stroke-width="1.6" stroke-linejoin="round" />
+            <path d="M18 11.5V26.5M18 17.5L22 14.5M18 21L14 18" stroke="#A3E635" stroke-width="1.6"
+              stroke-linecap="round" />
+            <circle cx="18" cy="11.5" r="1.6" fill="#BEF264" />
+            <defs>
+              <linearGradient id="sc-brand-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#0F3D2E" />
+                <stop offset="1" stop-color="#059669" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">SmartCrop<span class="brand-accent">.AI</span></span>
+          <span class="brand-sub">Formulation OS</span>
+        </div>
+      </div>
+
+      <nav class="nav-list" id="nav-list">
+        <!-- Populated dynamically from routes in src/app.js -->
+      </nav>
+
+      <div class="nav-rail-footer">
+        <div class="nav-status-pill" id="nav-status-pill" title="Backend & AI router status">
+          <span class="status-pulse-dot" aria-hidden="true"></span>
+          <span class="nav-status-text" id="nav-status-text">Connecting…</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="workspace-column">
+      <!-- Top Frosted Header -->
+      <header class="topbar glass-surface">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Open navigation menu">
+            <span class="dot-hamburger compact" aria-hidden="true">
+              <span class="dh-dot dh-1"></span>
+              <span class="dh-dot dh-2"></span>
+              <span class="dh-dot dh-3"></span>
+              <span class="dh-dot dh-4"></span>
+              <span class="dh-dot dh-5"></span>
+              <span class="dh-dot dh-6"></span>
+            </span>
+          </button>
+
+          <div class="topbar-brand-mobile">
+            <span class="brand-name">SmartCrop<span class="brand-accent">.AI</span></span>
+          </div>
+
+          <div class="breadcrumb" id="topbar-breadcrumb">
+            <span class="breadcrumb-root">SmartCrop.AI</span>
+            <span class="breadcrumb-sep" aria-hidden="true">/</span>
+            <span class="breadcrumb-current" id="breadcrumb-current">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="cmd-trigger" id="cmd-trigger" type="button" title="Quick jump (Ctrl+K)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span class="cmd-trigger-text">Jump to section…</span>
+            <kbd class="kbd-chip">Ctrl K</kbd>
+          </button>
+
+          <button class="avatar-chip" id="avatar-chip" type="button" title="Lab Profile & Account">
+            <span class="avatar-ring">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </span>
+            <span class="avatar-label" id="avatar-label">Sign in</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Active View Container -->
+      <main class="main-viewport" id="main-viewport" tabindex="-1">
+        <!-- Rendered dynamically by src/app.js -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Quick Navigation Command Modal -->
+  <div class="cmd-modal-overlay" id="cmd-modal-overlay" hidden>
+    <div class="cmd-modal glass-surface" role="dialog" aria-modal="true" aria-labelledby="cmd-input-label">
+      <div class="cmd-modal-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <label id="cmd-input-label" class="sr-only" for="cmd-input">Navigate to section</label>
+        <input id="cmd-input" class="cmd-input" type="text"
+          placeholder="Jump to Dashboard, Studio, Crop Explorer, Settings…" autocomplete="off" />
+        <button class="cmd-esc" id="cmd-close" type="button">ESC</button>
+      </div>
+      <div class="cmd-results" id="cmd-results"></div>
+    </div>
+  </div>
+
+  <!-- Generic Action Modal -->
+  <div class="cmd-modal-overlay" id="app-modal-overlay" hidden>
+    <div class="cmd-modal glass-surface app-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+      <div class="cmd-modal-header app-modal-header">
+        <span id="app-modal-title" class="app-modal-title">Modal</span>
+        <button class="cmd-esc" id="app-modal-close" type="button">ESC</button>
+      </div>
+      <div class="app-modal-body" id="app-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Subtle Notification Toast Container -->
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Modular Frontend Scripts -->
+  <script src="src/icons.js" defer></script>
+  <script src="src/api.js" defer></script>
+  <script src="src/views/dashboard.js" defer></script>
+  <script src="src/views/studio.js" defer></script>
+  <script src="src/views/ingredients.js" defer></script>
+  <script src="src/views/formulations.js" defer></script>
+  <script src="src/views/admin.js" defer></script>
+  <script src="src/views/settings.js" defer></script>
+  <script src="src/app.js" defer></script>
+</body>
+
+</html>
