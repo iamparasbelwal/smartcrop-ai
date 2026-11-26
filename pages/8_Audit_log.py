@@ -17,6 +17,7 @@ import ui
 from storage import now
 
 user = auth.require_admin()
+ui.show_page_skeleton("audit")
 events = auth.read_audit_log()
 names = auth.user_names()
 
@@ -226,7 +227,11 @@ with st.container(key="audit_layout"):
         shown = filtered[:200]
         if not shown:
             st.markdown(
-                '<div class="empty-state">No events match these filters.</div>',
+                ui.empty_skeleton_card_html(
+                    "No matching audit events",
+                    "No events match these filters. Broaden the area, actor, or search query.",
+                    rows=3,
+                ),
                 unsafe_allow_html=True,
             )
 

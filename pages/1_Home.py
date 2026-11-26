@@ -12,6 +12,7 @@ import projects
 import ui
 
 user = auth.require_login()
+ui.show_page_skeleton("home")
 
 hour = datetime.now().hour
 greeting = "Good morning" if hour < 12 else ("Good afternoon" if hour < 17 else "Good evening")
@@ -82,12 +83,22 @@ with st.container(key="home_layout"):
     if not filtered_projects:
         if search_query:
             st.markdown(
-                f'<div class="empty-state">No projects matching “{ui.esc(search_query)}”. Try a different term or clear the search.</div>',
+                ui.empty_skeleton_card_html(
+                    "No matching projects",
+                    f"No projects matching “{search_query}”. Try a different term or clear the search.",
+                    rows=2,
+                    card_mode=True,
+                ),
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
-                '<div class="empty-state">No projects in this lab yet. Click “New Project” above to start your first formulation.</div>',
+                ui.empty_skeleton_card_html(
+                    "No projects in this lab yet",
+                    "Click “New Project” above to start your first formulation.",
+                    rows=2,
+                    card_mode=True,
+                ),
                 unsafe_allow_html=True,
             )
     else:

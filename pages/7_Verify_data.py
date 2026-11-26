@@ -16,6 +16,7 @@ import ingredients
 import ui
 
 user = auth.require_admin()
+ui.show_page_skeleton("verify")
 rows = ingredients.list_ingredients()
 counts = ingredients.verified_counts()
 categories = sorted({row["category"] for row in rows})
@@ -287,7 +288,11 @@ with st.container(key="verify_layout"):
 
         if not visible:
             st.markdown(
-                '<div class="empty-state">No crops match these filters.</div>',
+                ui.empty_skeleton_card_html(
+                    "No matching crops",
+                    "No crops match these filters. Clear the search or choose another category.",
+                    rows=3,
+                ),
                 unsafe_allow_html=True,
             )
 

@@ -10,6 +10,7 @@ import projects
 import ui
 
 user = auth.require_admin()
+ui.show_page_skeleton("access")
 people = auth.list_users(user["lab_id"])
 active_people = [person for person in people if person["active"] == "yes"]
 lab_projects = projects.list_projects(user["lab_id"])
@@ -34,7 +35,12 @@ with st.container(key="access_layout"):
 
     if not lab_projects:
         st.markdown(
-            '<div class="empty-state">No projects in this lab yet. Create one on Home first.</div>',
+            ui.empty_skeleton_card_html(
+                "No projects in this lab yet",
+                "Create a project on Home first to configure team access permissions.",
+                rows=2,
+                card_mode=True,
+            ),
             unsafe_allow_html=True,
         )
     else:

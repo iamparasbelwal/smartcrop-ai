@@ -1,0 +1,126 @@
+{
+  "about": "Test conversations for the SmartCrop formulation skill. Two scenarios, each run in order (later turns see the recipe left by earlier ones). 'expect' is what a good answer must satisfy; check_blend.py verifies it against the app's real database and validator.",
+  "scenarios": [
+    {
+      "id": "A",
+      "project_name": "Millet biscuit",
+      "turns": [
+        {
+          "id": "A1-new-clean-label",
+          "turn": "NEW GOAL",
+          "prompt": "High-protein clean-label millet biscuit for school kids, low cost",
+          "expect": {
+            "forbid_ids": [
+              "ING-005",
+              "ING-013",
+              "ING-015"
+            ],
+            "forbid_clean_label": [
+              "check",
+              "no"
+            ],
+            "require_categories_any": [
+              "Pulse",
+              "Legume",
+              "Oilseed"
+            ]
+          }
+        },
+        {
+          "id": "A2-refine-cheaper",
+          "turn": "REFINE",
+          "prompt": "make it cheaper but keep protein high",
+          "expect": {
+            "forbid_ids": [
+              "ING-005",
+              "ING-015"
+            ],
+            "forbid_clean_label": [
+              "check",
+              "no"
+            ],
+            "cheaper_than_previous": true,
+            "protein_not_below_previous_by": 0.5
+          }
+        },
+        {
+          "id": "A3-pivot-nugget",
+          "turn": "NEW GOAL",
+          "prompt": "Actually let's make a savory plant-based nugget for Uttarakhand, gluten-free",
+          "expect": {
+            "forbid_ids": [
+              "ING-011",
+              "ING-012",
+              "ING-005",
+              "ING-015"
+            ],
+            "forbid_clean_label": [
+              "check",
+              "no"
+            ],
+            "min_removed_vs_previous": 3,
+            "require_categories_any": [
+              "Pulse",
+              "Legume"
+            ],
+            "text_mentions_any": [
+              "Uttarakhand"
+            ]
+          }
+        },
+        {
+          "id": "A4-question",
+          "turn": "QUESTION",
+          "prompt": "Why chickpea flour and not soy flour?",
+          "expect": {
+            "empty_recipe": true,
+            "text_mentions_any": [
+              "hexane"
+            ]
+          }
+        },
+        {
+          "id": "A5-missing-ingredient",
+          "turn": "REFINE",
+          "prompt": "add coconut oil and xanthan gum to the nugget",
+          "expect": {
+            "same_as_previous": true,
+            "text_mentions_any": [
+              "coconut"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "project_name": "Millet snack",
+      "turns": [
+        {
+          "id": "B1-vague",
+          "turn": "NEW GOAL",
+          "prompt": "make something healthy from millets",
+          "expect": {
+            "forbid_categories": [
+              "Dairy"
+            ],
+            "text_mentions_any": [
+              "assum"
+            ]
+          }
+        },
+        {
+          "id": "B2-dairy-requested",
+          "turn": "NEW GOAL",
+          "prompt": "now a khoya-style sweet using skim milk powder",
+          "expect": {
+            "require_ids": [
+              "ING-015"
+            ],
+            "min_removed_vs_previous": 3
+          }
+        }
+      ]
+    }
+  ]
+}

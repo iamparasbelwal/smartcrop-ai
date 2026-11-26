@@ -9,6 +9,7 @@ follow it; this file handles shapes, spacing and typography accents.
 from __future__ import annotations
 
 import html
+import time
 
 import streamlit as st
 
@@ -696,25 +697,74 @@ h1.wb-title {
 }
 
 /* ---------- Workbench 2-Pane & Chat Redesign ---------- */
-.st-key-panel_chat {
-    background: var(--panel) !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 18px !important;
-    padding: 1.2rem 1.4rem !important;
-    box-shadow: 0 1px 3px rgba(34, 32, 28, 0.04) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    min-height: clamp(560px, 74vh, 880px) !important;
-}
-
+.st-key-panel_chat,
 .st-key-panel_spec {
     background: var(--panel) !important;
     border: 1px solid var(--line) !important;
     border-radius: 18px !important;
-    padding: 1.2rem 1.5rem !important;
+    padding: 1.25rem 1.45rem !important;
     box-shadow: 0 1px 3px rgba(34, 32, 28, 0.04) !important;
-    min-height: 640px !important;
+    min-height: clamp(600px, 72vh, 760px) !important;
+}
+.st-key-panel_chat {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.55rem !important;
+}
+.st-key-panel_chat > [data-testid="stVerticalBlock"],
+.st-key-panel_chat [data-testid="stVerticalBlockBorderWrapper"] > [data-testid="stVerticalBlock"] {
+    gap: 0.55rem !important;
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.st-key-panel_chat [data-testid="stElementContainer"]:has(.chat-log),
+.st-key-panel_chat .element-container:has(.chat-log),
+.st-key-panel_chat [data-testid="stEmpty"]:has(.chat-log) {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 280px !important;
+}
+.st-key-panel_chat [data-testid="stElementContainer"]:has(.chat-log) > div,
+.st-key-panel_chat .element-container:has(.chat-log) > div {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.st-key-panel_chat [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+}
+.st-key-panel_chat [data-testid="stForm"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+.st-key-panel_chat [data-testid="stForm"] [data-testid="stTextInputRootElement"] {
+    min-height: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 11px !important;
+    border: 1px solid var(--line) !important;
+    background: #faf8f2 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+}
+.st-key-panel_chat [data-testid="stForm"] [data-testid="stTextInputRootElement"] input {
+    font-size: 0.9rem !important;
+    padding: 0.35rem 0.8rem !important;
+    line-height: 1.35 !important;
+}
+.st-key-panel_chat [data-testid="stForm"] [data-testid="stTextInputRootElement"]:focus-within {
+    border-color: var(--accent) !important;
+    background: #ffffff !important;
+}
+.st-key-panel_chat [data-testid="stForm"] [data-testid="stBaseButton-primaryFormSubmit"] {
+    min-height: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 11px !important;
+    padding: 0 1rem !important;
 }
 
 .chat-head {
@@ -731,18 +781,44 @@ h1.wb-title {
     padding-bottom: 0.6rem;
     border-bottom: 1px solid var(--line);
 }
+.chat-header-rule {
+    border-bottom: 1px solid var(--line);
+    margin: 0.45rem 0 0.35rem !important;
+}
+.st-key-workbench_model {
+    max-width: 230px !important;
+    width: 100% !important;
+    margin-left: auto !important;
+}
+.st-key-workbench_model [data-baseweb="select"] > div {
+    min-height: 1.95rem !important;
+    background: var(--sand) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 10px !important;
+    font-size: 0.78rem !important;
+    color: var(--ink) !important;
+    box-shadow: none !important;
+}
+.st-key-workbench_model [data-baseweb="select"] > div:focus-within {
+    border-color: var(--accent) !important;
+}
+.chat-engine-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.3rem;
+}
 .chat-engine {
+    display: inline-block;
     flex-shrink: 0;
-    font-size: 0.64rem;
-    letter-spacing: 0.05em;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #6b665c;
     background: var(--sand);
     border: 1px solid var(--line);
     border-radius: 999px;
-    padding: 0.16rem 0.5rem;
+    padding: 0.12rem 0.5rem;
     white-space: nowrap;
-    margin-top: 0.1rem;
 }
 .chat-meta {
     display: block;
@@ -776,15 +852,16 @@ h1.wb-title {
 }
 
 .chat-log {
-    height: clamp(320px, 46vh, 620px);
+    flex: 1 1 auto;
+    height: clamp(320px, 48vh, 560px);
     min-height: 280px;
     overflow-y: auto;
     overscroll-behavior: contain;
     scroll-behavior: smooth;
-    padding: 0.6rem 0.35rem 0.6rem 0.2rem;
+    padding: 0.45rem 0.35rem 0.45rem 0.15rem;
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.8rem;
     scrollbar-width: thin;
 }
 .chat-log::-webkit-scrollbar { width: 6px; }
@@ -825,11 +902,12 @@ h1.wb-title {
 }
 
 .chat-chips-label {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     color: var(--muted);
-    margin: 0.8rem 0 0.4rem;
+    line-height: 1.25;
+    margin: 0.25rem 0 0.2rem !important;
 }
 .chat-row.ai .chat-bubble,
 .chat-row.me .chat-bubble { overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
@@ -1002,9 +1080,128 @@ details.ai-thought[open] summary .ai-status-chevron {
     border-radius: 12px;
     padding: 0.65rem 0.8rem;
 }
+@keyframes skel-shimmer {
+    0% { background-position: 180% 0; }
+    100% { background-position: -80% 0; }
+}
 .skel-bar {
-    background: #eae6da;
+    background: linear-gradient(90deg, #eae6da 25%, #f4f1e8 50%, #eae6da 75%);
+    background-size: 220% 100%;
+    animation: skel-shimmer 1.5s ease-in-out infinite;
     border-radius: 6px;
+}
+.st-key-page_skel_host {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+}
+.st-key-page_skel_host:not(:has(.skel-page)) {
+    display: none !important;
+}
+.skel-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.05rem;
+}
+.skel-page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    padding-bottom: 0.25rem;
+}
+.skel-page-head-left {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.skel-page-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+}
+.skel-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.9rem 0 0.5rem;
+}
+.skel-search-row {
+    display: grid;
+    grid-template-columns: 3.5fr 1.2fr;
+    gap: 0.9rem;
+    align-items: center;
+}
+.skel-input-ghost {
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 0 0.9rem;
+    display: flex;
+    align-items: center;
+}
+.skel-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.2rem 1.4rem;
+}
+.skel-pcard {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.25rem 1.45rem;
+    min-height: 112px;
+    display: grid;
+    grid-template-columns: 3.8fr 1.4fr;
+    gap: 1.2rem;
+    align-items: center;
+}
+.skel-kpi-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+.skel-kpi-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+.skel-stat-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.05rem 1.25rem;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.skel-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 0.3rem;
+}
+.skel-table-line {
+    display: grid;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.72rem 0.15rem;
+    border-bottom: 1px solid #f1eee4;
+}
+.skel-table-line:last-child { border-bottom: none; }
+.skel-auth-wrap {
+    max-width: 430px;
+    width: 100%;
+    margin: 0.5rem auto 0;
+}
+@media (max-width: 900px) {
+    .skel-kpi-3, .skel-kpi-4, .skel-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .skel-pcard, .skel-search-row { grid-template-columns: 1fr; }
 }
 .skel-val { width: 58%; height: 20px; margin: 0.4rem 0 0.35rem; }
 .skel-sub { width: 76%; height: 9px; opacity: 0.7; }
@@ -1157,9 +1354,51 @@ h1.wb-title, .wb-title { animation-delay: 50ms; }
 }
 
 /* ---------- sign in ---------- */
-.st-key-auth-form, .st-key-auth-demo { max-width: 430px; margin-left: auto !important; margin-right: auto !important; }
-.st-key-auth-form { margin-top: 1.6rem !important; }
+.st-key-auth_split {
+    max-width: 1120px !important;
+    margin: 1.5rem auto 0 !important;
+}
+.st-key-auth_welcome_card {
+    background: var(--sand) !important;
+    border: 2px solid #d5cfc0 !important;
+    border-radius: 22px !important;
+    padding: 3rem 2.7rem !important;
+    box-shadow: 0 1px 2px rgba(34, 32, 28, 0.03), 0 18px 40px -30px rgba(34, 32, 28, 0.45) !important;
+    min-height: 520px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+.auth-left-eyebrow {
+    text-align: left !important;
+    margin-bottom: 0.9rem !important;
+}
+h1.auth-left-title {
+    text-align: left !important;
+    margin: 0 0 0.85rem !important;
+}
+p.auth-left-sub {
+    text-align: left !important;
+    margin: 0 !important;
+    max-width: 31rem !important;
+}
+.st-key-auth-form, .st-key-auth-demo {
+    max-width: 470px !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+.st-key-auth-form { margin-top: 0 !important; }
 .st-key-auth-demo { margin-top: 0.9rem !important; }
+.st-key-auth-demo [data-testid="stBaseButton-secondary"] {
+    font-size: 0.8rem !important;
+    padding: 0.35rem 0.5rem !important;
+    white-space: nowrap !important;
+}
+@media (max-width: 900px) {
+    .st-key-auth_welcome_card { min-height: 0 !important; padding: 1.8rem !important; }
+    .st-key-auth-form, .st-key-auth-demo { max-width: none !important; margin-left: 0 !important; }
+}
 </style>
 """.replace("SERIF_PLACEHOLDER", SERIF)
 
@@ -1232,3 +1471,216 @@ def spinner_html(text: str = "Formulating...") -> str:
         f'<div style="font-size: 0.86rem; color: var(--muted); font-weight: 500; letter-spacing: 0.02em;">{esc(text)}</div>'
         f'</div>'
     )
+
+
+def _skel_bar(width: str, height: int = 12, style: str = "") -> str:
+    extra = f"; {style}" if style else ""
+    return f'<div class="skel-bar" style="width: {width}; height: {height}px{extra};"></div>'
+
+
+def _skel_page_head(action_widths: tuple[int, ...] = (140,)) -> str:
+    actions = "".join(
+        f'<div class="skel-btn-ghost" style="width: {w}px; height: 38px; border-radius: 11px;"></div>'
+        for w in action_widths
+    )
+    return (
+        '<div class="skel-page-head">'
+        '<div class="skel-page-head-left">'
+        + _skel_bar("170px", 10, "margin-bottom: 0.55rem")
+        + _skel_bar("260px", 30, "margin-bottom: 0.55rem")
+        + _skel_bar("62%", 12)
+        + '</div>'
+        + (f'<div class="skel-page-head-actions">{actions}</div>' if actions else "")
+        + '</div>'
+    )
+
+
+def _skel_kpi_row(count: int = 3) -> str:
+    cls = "skel-kpi-4" if count == 4 else "skel-kpi-3"
+    cards = "".join(
+        '<div class="skel-stat-card">'
+        + _skel_bar("52%", 10)
+        + _skel_bar("34%", 24, "margin: 0.55rem 0 0.45rem")
+        + _skel_bar("68%", 10, "opacity: 0.75")
+        + '</div>'
+        for _ in range(count)
+    )
+    return f'<div class="{cls}">{cards}</div>'
+
+
+def _skel_table_card(col_widths: tuple[str, ...], rows: int = 5, *, with_badge: bool = True) -> str:
+    template = " ".join("1.2fr" if i else "2fr" for i in range(len(col_widths)))
+    head_cells = "".join(_skel_bar(w, 10, "opacity: 0.75") for w in col_widths)
+    body_rows = ""
+    for r in range(rows):
+        cells = "".join(
+            _skel_bar("72%" if idx == 0 else ("64%" if r % 2 == 0 else "52%"), 13 if idx == 0 else 11)
+            for idx in range(len(col_widths))
+        )
+        body_rows += f'<div class="skel-table-line" style="grid-template-columns: {template};">{cells}</div>'
+    badge_html = '<div class="skel-btn-ghost" style="width: 78px; height: 24px; border-radius: 999px;"></div>' if with_badge else ""
+    return (
+        '<div class="skel-card">'
+        '<div class="skel-head" style="margin-bottom: 0.85rem;">'
+        '<div>'
+        + _skel_bar("180px", 18, "margin-bottom: 0.45rem")
+        + _skel_bar("300px", 10, "opacity: 0.8")
+        + '</div>'
+        + badge_html
+        + '</div>'
+        f'<div class="skel-table-line" style="grid-template-columns: {template}; border-bottom: 1px solid var(--line);">{head_cells}</div>'
+        + body_rows
+        + '</div>'
+    )
+
+
+def _skel_project_cards(count: int = 3) -> str:
+    widths = ("46%", "38%", "52%")
+    cards = ""
+    for i in range(count):
+        cards += (
+            '<div class="skel-pcard">'
+            '<div>'
+            '<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.55rem;">'
+            + _skel_bar(widths[i % len(widths)], 16)
+            + '<div class="skel-btn-ghost" style="width: 84px; height: 20px; border-radius: 999px;"></div>'
+            + '</div>'
+            + _skel_bar("78%", 11, "margin-bottom: 0.45rem; opacity: 0.85")
+            + _skel_bar("44%", 10, "opacity: 0.65")
+            + '</div>'
+            '<div class="skel-btn-ghost" style="width: 100%; height: 38px; border-radius: 12px;"></div>'
+            '</div>'
+        )
+    return cards
+
+
+def page_skeleton_html(page_key: str) -> str:
+    """Layout-matched skeleton loading wireframe for each SmartCrop.AI page."""
+    if page_key == "auth":
+        inner = (
+            '<div style="max-width: 1120px; margin: 1.5rem auto 0; display: grid; grid-template-columns: 1.12fr 1fr; gap: 1.5rem; align-items: center;">'
+            '<div class="skel-card" style="background: var(--sand); border: 2px solid #d5cfc0; border-radius: 22px; padding: 3rem 2.7rem; min-height: 520px; display: flex; flex-direction: column; justify-content: center;">'
+            + _skel_bar("110px", 10, "margin-bottom: 0.9rem")
+            + _skel_bar("220px", 34, "margin-bottom: 0.85rem")
+            + _skel_bar("88%", 13, "margin-bottom: 0.45rem")
+            + _skel_bar("68%", 13)
+            + '</div>'
+            '<div style="max-width: 470px; width: 100%; margin-left: auto; display: flex; flex-direction: column; gap: 0.9rem;">'
+            '<div class="skel-card" style="padding: 1.2rem;">'
+            + _skel_bar("100%", 38, "margin-bottom: 0.8rem")
+            + _skel_bar("100%", 38, "margin-bottom: 0.9rem")
+            + '<div class="skel-btn-ghost" style="width: 100%; height: 40px; border-radius: 12px;"></div>'
+            + '</div>'
+            '<div class="skel-card" style="padding: 1.15rem 1.4rem;">'
+            + _skel_bar("130px", 14, "margin-bottom: 0.8rem")
+            + _skel_bar("100%", 90, "opacity: 0.65")
+            + '</div></div></div>'
+        )
+    elif page_key == "home":
+        inner = (
+            '<div class="skel-hero">'
+            + _skel_bar("150px", 10, "margin-bottom: 0.9rem")
+            + _skel_bar("290px", 36, "margin-bottom: 0.7rem")
+            + _skel_bar("410px", 13)
+            + '</div>'
+            '<div class="skel-search-row">'
+            '<div class="skel-input-ghost">' + _skel_bar("45%", 12) + '</div>'
+            '<div class="skel-btn-ghost" style="width: 100%; height: 42px; border-radius: 12px;"></div>'
+            '</div>'
+            '<div class="skel-page-head" style="padding: 0.4rem 0 0;">'
+            + _skel_bar("200px", 20)
+            + _skel_bar("180px", 11, "opacity: 0.75")
+            + '</div>'
+            + _skel_project_cards(3)
+        )
+    elif page_key == "people":
+        inner = (
+            _skel_page_head((150,))
+            + _skel_kpi_row(3)
+            + _skel_table_card(("55%", "65%", "45%", "45%", "50%"), rows=4, with_badge=False)
+        )
+    elif page_key == "admin":
+        inner = (
+            _skel_page_head((125, 195))
+            + _skel_table_card(("55%", "65%", "45%", "45%", "55%"), rows=4, with_badge=True)
+        )
+    elif page_key == "access":
+        cards = "".join(
+            '<div class="skel-card" style="padding: 1rem 1.25rem;">'
+            + _skel_bar("48%", 15, "margin-bottom: 0.7rem")
+            + _skel_bar("82%", 11, "margin-bottom: 0.45rem; opacity: 0.75")
+            + _skel_bar("74%", 11, "opacity: 0.65")
+            + '</div>'
+            for _ in range(3)
+        )
+        inner = _skel_page_head((150,)) + cards
+    elif page_key == "verify":
+        filters = (
+            '<div class="skel-filter-grid">'
+            + "".join('<div class="skel-input-ghost">' + _skel_bar("60%", 11) + '</div>' for _ in range(4))
+            + '</div>'
+        )
+        inner = (
+            _skel_page_head((120,))
+            + _skel_kpi_row(4)
+            + filters
+            + _skel_table_card(("60%", "48%", "40%", "40%", "40%", "48%", "48%", "45%"), rows=6, with_badge=True)
+        )
+    else:  # audit
+        filters = (
+            '<div class="skel-filter-grid">'
+            + "".join('<div class="skel-input-ghost">' + _skel_bar("60%", 11) + '</div>' for _ in range(4))
+            + '</div>'
+        )
+        inner = (
+            _skel_page_head((150,))
+            + _skel_kpi_row(3)
+            + filters
+            + _skel_table_card(("45%", "55%", "70%", "45%", "60%", "35%"), rows=6, with_badge=True)
+        )
+    return f'<div class="skel-page" aria-busy="true">{inner}</div>'
+
+
+def empty_skeleton_card_html(title: str, subtitle: str, *, rows: int = 3, card_mode: bool = False) -> str:
+    """Dashed wireframe placeholder paired with an empty/filtered message."""
+    if card_mode:
+        ghosts = "".join(
+            '<div class="skel-kpi-card" style="margin-bottom: 0.65rem;">'
+            + _skel_bar("38%", 14, "margin-bottom: 0.45rem")
+            + _skel_bar("68%", 10, "opacity: 0.7")
+            + '</div>'
+            for _ in range(rows)
+        )
+    else:
+        ghosts = "".join(
+            '<div class="skel-table-line" style="grid-template-columns: 2fr 1.2fr 1.2fr 1fr;">'
+            + _skel_bar(w, 12)
+            + _skel_bar("55%", 10, "opacity: 0.7")
+            + _skel_bar("60%", 10, "opacity: 0.7")
+            + _skel_bar("48%", 10, "opacity: 0.6")
+            + '</div>'
+            for w in ("72%", "58%", "66%")[:rows]
+        )
+    return (
+        f'{ghosts}'
+        '<div class="skel-empty-note">'
+        f'<strong>{esc(title)}</strong><br>{esc(subtitle)}'
+        '</div>'
+    )
+
+
+def mark_active_page(page_key: str) -> None:
+    """Record the active page key so navigating away and back triggers skeleton loading cleanly."""
+    st.session_state["_active_page"] = page_key
+
+
+def show_page_skeleton(page_key: str, delay: float = 0.35) -> None:
+    """Render a layout-matched skeleton loading shimmer once per page navigation."""
+    if st.session_state.get("_active_page") == page_key:
+        return
+    st.session_state["_active_page"] = page_key
+    with st.container(key="page_skel_host"):
+        slot = st.empty()
+        slot.markdown(page_skeleton_html(page_key), unsafe_allow_html=True)
+        time.sleep(delay)
+        slot.empty()

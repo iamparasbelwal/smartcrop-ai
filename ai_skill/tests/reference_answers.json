@@ -1,0 +1,221 @@
+{
+  "about": "Reference answers written by hand to show the target shape and quality (same JSON keys the app asks models for). Replace with real model output to test a model: keep the same ids.",
+  "answers": {
+    "A1-new-clean-label": {
+      "reasoning": "NEW GOAL. Product: baked sweet biscuit for children. Optimising protein and low cost. Constraints: clean-label, plant-based by default, no region given. Protein candidates: whole soybean is the cheapest protein per rupee, groundnut flour is protein-dense, chickpea flour costs more. Defatted soy flour is hexane-extracted (check), so it is out for clean-label. Base: pearl millet plus wheat for a cohesive crumb. Jaggery sweetens within its cap. Runner-up: a chickpea-led blend, rejected as dearer for the same protein.",
+      "selected_notes": "Base: pearl millet, wheat flour. Protein: whole soybean (at its cap, needs heat treatment), groundnut flour. Sweetener: jaggery. Richness: sesame. Seasoning: salt. Excluded: defatted soy flour (hexane, check), guar gum (no gum needed), skim milk powder (plant-based). Allergens present: soy, groundnut, sesame, wheat. Gaps: no fat, leavening or water in the database; all values are estimates. Shares: 30+20+18+12+16+3+1 = 100.",
+      "reply": "This is a baked millet biscuit built around whole soybean and groundnut flour for protein, with wheat holding the crumb together and jaggery for sweetness. I left out the hexane-processed soy flour and gums to keep it clean-label. Whole soybean needs heat treatment, and the database holds no oil or leavening, so texture is something the lab must confirm. Treat it as a starting point needing lab validation.",
+      "recipe": [
+        {
+          "ingredient_id": "ING-001",
+          "share_pct": 30
+        },
+        {
+          "ingredient_id": "ING-011",
+          "share_pct": 20
+        },
+        {
+          "ingredient_id": "ING-006",
+          "share_pct": 18
+        },
+        {
+          "ingredient_id": "ING-016",
+          "share_pct": 12
+        },
+        {
+          "ingredient_id": "ING-012",
+          "share_pct": 16
+        },
+        {
+          "ingredient_id": "ING-017",
+          "share_pct": 3
+        },
+        {
+          "ingredient_id": "ING-014",
+          "share_pct": 1
+        }
+      ]
+    },
+    "A2-refine-cheaper": {
+      "reasoning": "REFINE. Goal stays a clean-label millet biscuit, now cheaper with protein held. Standing constraints kept. Cost drivers: sesame and groundnut flour. Wheat and jowar are the cheapest bases, and whole soybean stays at its cap as the cheapest protein. Moving the base to wheat and jowar, and trading sesame and some jaggery for more groundnut flour, lowers cost while keeping protein. Runner-up: more wheat only, rejected because it let protein slip.",
+      "selected_notes": "Base: wheat flour, jowar. Protein: whole soybean (at cap), groundnut flour. Sweetener: jaggery trimmed. Sesame cut to a trace. Still excluded: defatted soy flour, gums, dairy. Allergens: soy, groundnut, sesame, wheat. Shares: 32+20+20+12+14+1+1 = 100.",
+      "reply": "I moved the base toward wheat and jowar, the cheapest flours in the database, kept whole soybean at its limit for protein, and used a little more groundnut flour while trimming sesame and jaggery. Cost should drop without giving up protein, and the app's figures will confirm it. Still a starting point needing lab validation.",
+      "recipe": [
+        {
+          "ingredient_id": "ING-011",
+          "share_pct": 32
+        },
+        {
+          "ingredient_id": "ING-003",
+          "share_pct": 20
+        },
+        {
+          "ingredient_id": "ING-006",
+          "share_pct": 20
+        },
+        {
+          "ingredient_id": "ING-016",
+          "share_pct": 12
+        },
+        {
+          "ingredient_id": "ING-012",
+          "share_pct": 14
+        },
+        {
+          "ingredient_id": "ING-014",
+          "share_pct": 1
+        },
+        {
+          "ingredient_id": "ING-017",
+          "share_pct": 1
+        }
+      ]
+    },
+    "A3-pivot-nugget": {
+      "reasoning": "NEW GOAL: the format changed from sweet biscuit to savoury nugget, so I rebuilt from the full database. Constraints: gluten-free (no wheat), plant-based, clean-label still active, region Uttarakhand. No crop in the database lists Uttarakhand as its region, so I cannot match it. Protein core: chickpea, whole soybean, groundnut; defatted soy stays out (hexane). Bulk: foxtail millet and rice. Gluten-free binding needs a gum, so guar at its cap. No sweetener. Runner-up: lentil-led protein, rejected as dearer.",
+      "selected_notes": "Protein: chickpea flour, whole soybean (heat treatment), groundnut flour. Bulk: foxtail millet, rice flour. Binder: guar gum at its 2% cap (a gum, used because a gluten-free nugget will not hold otherwise). Seasoning: salt. Excluded: wheat (gluten), jaggery (savoury), defatted soy flour (check), skim milk powder (plant-based). Allergens: soy, groundnut. Gaps: no Uttarakhand-origin crop, no oil, spices or coating, and no fibrous meat-like texture in the database. Shares: 33+16+15+17+16+2+1 = 100.",
+      "reply": "A savoury, gluten-free nugget with chickpea, whole soybean and groundnut flour as the protein core, and foxtail millet and rice flour for bulk. Guar gum is the only binder available, so it is used at its limit. None of the database crops come from Uttarakhand, and spices, oil and the meat-like bite are not modelled. It is a starting point needing lab validation.",
+      "recipe": [
+        {
+          "ingredient_id": "ING-007",
+          "share_pct": 33
+        },
+        {
+          "ingredient_id": "ING-006",
+          "share_pct": 16
+        },
+        {
+          "ingredient_id": "ING-016",
+          "share_pct": 15
+        },
+        {
+          "ingredient_id": "ING-004",
+          "share_pct": 17
+        },
+        {
+          "ingredient_id": "ING-010",
+          "share_pct": 16
+        },
+        {
+          "ingredient_id": "ING-013",
+          "share_pct": 2
+        },
+        {
+          "ingredient_id": "ING-014",
+          "share_pct": 1
+        }
+      ]
+    },
+    "A4-question": {
+      "reasoning": "QUESTION. The user asks why chickpea flour was chosen over soy flour. Defatted soy flour is the only soy flour in the database and it is marked check because it is hexane-extracted. Clean-label is a standing constraint, so I kept it out. Chickpea flour is a single-ingredient milled gram marked clean.",
+      "selected_notes": "No change to the blend. Defatted soy flour: check (hexane-extracted, ask supplier for residue spec), cap 25%. Chickpea flour: clean, cap 40%.",
+      "reply": "Defatted soy flour is hexane-extracted, so the database marks it as needing supplier confirmation, and you asked for clean-label. Chickpea flour is a plain milled pulse with no such flag and a generous limit. If you accept a supplier residue spec for the soy flour, I can bring it back in.",
+      "recipe": []
+    },
+    "A5-missing-ingredient": {
+      "reasoning": "REFINE. Two requests. Coconut oil is not in the database, so I cannot add it or any stand-in. Xanthan gum is on the clean-label watchlist; the database names guar gum as its replacement and guar is already in the blend at its cap. The current blend already answers the goal as well as the database allows, so I return it unchanged.",
+      "selected_notes": "Blend unchanged. Gap: no oil of any kind in the database. Xanthan gum: watchlist term, not in the database; guar gum already supplies the binding at its 2% cap. Shares: 33+16+15+17+16+2+1 = 100.",
+      "reply": "Coconut oil is not in the database, so I cannot add it; the nearest options are groundnut flour, which already supplies some fat. Xanthan gum is flagged on the clean-label list and guar gum already does that job, so the blend stays as it is. Still a starting point needing lab validation.",
+      "recipe": [
+        {
+          "ingredient_id": "ING-007",
+          "share_pct": 33
+        },
+        {
+          "ingredient_id": "ING-006",
+          "share_pct": 16
+        },
+        {
+          "ingredient_id": "ING-016",
+          "share_pct": 15
+        },
+        {
+          "ingredient_id": "ING-004",
+          "share_pct": 17
+        },
+        {
+          "ingredient_id": "ING-010",
+          "share_pct": 16
+        },
+        {
+          "ingredient_id": "ING-013",
+          "share_pct": 2
+        },
+        {
+          "ingredient_id": "ING-014",
+          "share_pct": 1
+        }
+      ]
+    },
+    "B1-vague": {
+      "reasoning": "NEW GOAL, vague. Assumption: a ready-to-cook millet porridge mix, since no format was given. I cannot claim a product is healthy, so I aim for a fibre-rich millet base with a pulse and a little oilseed. Millets: finger, foxtail, pearl. Pulse: green gram flour. Groundnut for richness, jaggery for mild sweetness. Runner-up: a flatbread flour, rejected because it needs a gluten source or a gum.",
+      "selected_notes": "Assumed format: porridge mix. Base: finger millet, foxtail millet, pearl millet. Protein: green gram flour, groundnut flour. Sweetener: jaggery. Flavour: sesame. Excluded: dairy (plant-based), gums (not needed). Allergens: groundnut, sesame. Gaps: no water or spices in the database. Shares: 30+20+15+15+8+10+2 = 100.",
+      "reply": "I assumed you want a ready-to-cook millet porridge mix. It combines three millets for body, green gram flour and a little groundnut for protein, and some jaggery for mild sweetness. I am not making health claims; the lab has to validate it. Tell me the product format or target if you had something else in mind and I will rebuild it.",
+      "recipe": [
+        {
+          "ingredient_id": "ING-002",
+          "share_pct": 30
+        },
+        {
+          "ingredient_id": "ING-004",
+          "share_pct": 20
+        },
+        {
+          "ingredient_id": "ING-001",
+          "share_pct": 15
+        },
+        {
+          "ingredient_id": "ING-009",
+          "share_pct": 15
+        },
+        {
+          "ingredient_id": "ING-016",
+          "share_pct": 8
+        },
+        {
+          "ingredient_id": "ING-012",
+          "share_pct": 10
+        },
+        {
+          "ingredient_id": "ING-017",
+          "share_pct": 2
+        }
+      ]
+    },
+    "B2-dairy-requested": {
+      "reasoning": "NEW GOAL: the format changed to a khoya-style sweet, and the user explicitly asks for skim milk powder, so the plant-based default is lifted for the Dairy category. Rebuilt from the full database. Skim milk powder at its cap supplies the milk solids. Groundnut flour and sesame stand in for fat. Green gram and rice flour give body, jaggery sweetens, a trace of guar adds smoothness. Runner-up: chickpea-led body, rejected as dearer.",
+      "selected_notes": "Dairy: skim milk powder at its 20% cap (requested). Fat stand-ins: groundnut flour, sesame. Body: green gram flour, rice flour. Sweetener: jaggery. Binder: guar at a trace. Allergens: milk, groundnut, sesame. Gaps: no oil or nuts, so fat mouthfeel and texture are unproven. Shares: 20+28+10+15+8+18+1 = 100.",
+      "reply": "A khoya-style sweet using skim milk powder at its limit, with groundnut flour and sesame standing in for milk fat, green gram and rice flour for body, and jaggery for sweetness. The database has no oil or nuts, so the rich mouthfeel of real khoya is unproven. It is a starting point needing lab validation.",
+      "recipe": [
+        {
+          "ingredient_id": "ING-015",
+          "share_pct": 20
+        },
+        {
+          "ingredient_id": "ING-016",
+          "share_pct": 28
+        },
+        {
+          "ingredient_id": "ING-017",
+          "share_pct": 10
+        },
+        {
+          "ingredient_id": "ING-009",
+          "share_pct": 15
+        },
+        {
+          "ingredient_id": "ING-010",
+          "share_pct": 8
+        },
+        {
+          "ingredient_id": "ING-012",
+          "share_pct": 18
+        },
+        {
+          "ingredient_id": "ING-013",
+          "share_pct": 1
+        }
+      ]
+    }
+  }
+}

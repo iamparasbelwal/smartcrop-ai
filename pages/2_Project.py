@@ -17,6 +17,7 @@ import projects
 import ui
 
 user = auth.require_login()
+ui.mark_active_page("project")
 project = projects.active_project(user)
 
 # When no project is selected: keep standard expanded sidebar (240px) and display clean empty state
@@ -519,8 +520,7 @@ def _skeleton_spec_html() -> str:
         + "".join(rows)
         + '<div class="skel-empty-note">'
         '<strong>No formulation yet</strong><br>'
-        'Tell me your formulation goals in the chat on the left. Gemini will access your private '
-        'crop database, extract matching ingredients, and build your formulation here.'
+        'Send us your requirements in the chat, the AI models will do the rest for you.'
         '</div>'
     )
 
@@ -581,9 +581,12 @@ def ai_draft_dialog(project_name: str, project_id: str) -> None:
         if len(brief.strip()) < 12:
             st.warning("Write a line or two about the product you want.")
         else:
-            with st.spinner("Gemini is weighing the crops…"):
+            with st.spinner("Formulating recipe from crop database…"):
                 st.session_state["ai_draft_result"] = copilot.draft(
-                    brief, project_name=project_name, cook=cook
+                    brief,
+                    project_name=project_name,
+                    cook=cook,
+                    model=st.session_state.get("workbench_model") or None,
                 )
             st.session_state["ai_draft_prompt"] = brief.strip()
 
@@ -698,24 +701,39 @@ if save_notice:
 
 left, right = st.columns([1.38, 1.0], gap="large")
 
+model_choices = gemini.model_choices()
+model_options = [value for _, value in model_choices]
+model_labels = {value: label for label, value in model_choices}
+if st.session_state.get("workbench_model") not in model_options:
+    st.session_state["workbench_model"] = model_options[0]
+
 with left:
     with st.container(border=True, key="panel_chat"):
-        st.markdown(
-            '<div class="chat-head">'
-            "<div>"
-            '<div class="panel-label">SMARTCROP CO-PILOT</div>'
-            '<div class="panel-title" style="margin-bottom: 0;">Formulation assistant</div>'
-            "</div>"
-            f'<span class="chat-engine">{ui.esc(gemini.status_label())}</span>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
+        head_left, head_right = st.columns([1.45, 1.0], vertical_alignment="top", gap="small")
+        with head_left:
+            st.markdown(
+                '<div class="panel-label" style="margin-bottom: 0.15rem;">SMARTCROP CO-PILOT</div>'
+                '<div class="panel-title" style="margin-bottom: 0;">Formulation assistant</div>',
+                unsafe_allow_html=True,
+            )
+        with head_right:
+            selected_model = st.selectbox(
+                "AI router model",
+                options=model_options,
+                format_func=lambda val: model_labels.get(val, val or "Auto"),
+                key="workbench_model",
+                label_visibility="collapsed",
+            )
+            st.markdown(
+                f'<div class="chat-engine-wrap"><span class="chat-engine">{ui.esc(gemini.status_label(selected_model))}</span></div>',
+                unsafe_allow_html=True,
+            )
+        st.markdown('<div class="chat-header-rule"></div>', unsafe_allow_html=True)
         chat_slot = st.empty()
         chat_slot.markdown(_chat_html(messages), unsafe_allow_html=True)
-        ui.autoscroll()
 
         st.markdown('<div class="chat-chips-label">Quick prompts</div>', unsafe_allow_html=True)
-        prompt_cols = st.columns(4)
+        prompt_cols = st.columns(4, gap="small")
         if has_formulation:
             prompts = [
                 ("More protein", "more protein", ":material/bolt:"),
@@ -742,7 +760,7 @@ with left:
 
         input_placeholder = "Describe your formulation goals"
         with st.form("workbench_chat_form", clear_on_submit=True, border=False):
-            input_column, send_column = st.columns([4.2, 1.2], vertical_alignment="center")
+            input_column, send_column = st.columns([4.2, 1.2], vertical_alignment="center", gap="small")
             with input_column:
                 instruction = st.text_input(
                     "Instruction",
@@ -782,6 +800,7 @@ with left:
                 project_description=project.get("description", ""),
                 db_brief=str(db_ctx["summary"]),
                 history=messages,
+                model=selected_model or None,
             )
             chat_slot.markdown(
                 _chat_html(
@@ -805,6 +824,7 @@ with left:
                 st.session_state.pop(f"explain_{project['project_id']}", None)
                 st.session_state.pop(f"cl_explain_{project['project_id']}", None)
             st.rerun()
+    ui.autoscroll()
 
 with right:
     with st.container(border=True, key="panel_spec"):
@@ -932,7 +952,9 @@ with right:
                 ):
                     with st.spinner("Reading the blend…"):
                         try:
-                            st.session_state[explain_key] = copilot.explain_blend(recipe_items)
+                            st.session_state[explain_key] = copilot.explain_blend(
+                                recipe_items, model=selected_model or None
+                            )
                         except gemini.GeminiError as exc:
                             st.warning(str(exc))
                 if st.session_state.get(explain_key):
@@ -975,9 +997,11 @@ with right:
                     icon=":material/auto_awesome:",
                     width="stretch",
                 ):
-                    with st.spinner("Gemini is reading the watchlist…"):
+                    with st.spinner("Checking watchlist notes…"):
                         try:
-                            st.session_state[cl_key] = copilot.explain_clean_label(findings)
+                            st.session_state[cl_key] = copilot.explain_clean_label(
+                                findings, model=selected_model or None
+                            )
                         except gemini.GeminiError as exc:
                             st.warning(str(exc))
                 if st.session_state.get(cl_key):

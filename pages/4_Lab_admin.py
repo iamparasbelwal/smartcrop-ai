@@ -8,6 +8,7 @@ import auth
 import ui
 
 user = auth.require_admin()
+ui.show_page_skeleton("admin")
 people = auth.list_users(user["lab_id"])
 active_people = [person for person in people if person["active"] == "yes"]
 

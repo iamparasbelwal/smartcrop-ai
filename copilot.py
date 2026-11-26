@@ -121,6 +121,7 @@ def chat(
     project_description: str = "",
     db_brief: str = "",
     history: list[dict] | None = None,
+    model: str | None = None,
 ) -> dict:
     """One chat turn. Returns reply, validated recipe (or None), engine, notes, and reasoning trace."""
     instruction = (instruction or "").strip()
@@ -145,6 +146,7 @@ def chat(
             project_description=project_description,
             db_brief=db_brief,
             history=history,
+            model=model,
         )
     except gemini.GeminiError as exc:
         local_items, local_reply, changed = whatif.apply(
@@ -154,7 +156,7 @@ def chat(
             project_description=project_description,
         )
         return {
-            "reply": f"{local_reply}\n\n(Gemini is temporarily busy — {exc} Local database rules answered instead.)",
+            "reply": f"{local_reply}\n\n(Cloud AI models are temporarily busy — {exc} Local database rules answered instead.)",
             "items": local_items if changed else None,
             "engine": "local",
             "notes": [],
@@ -217,10 +219,16 @@ def chat(
     }
 
 
-def draft(brief: str, *, project_name: str = "", cook: str = "") -> dict:
+def draft(
+    brief: str,
+    *,
+    project_name: str = "",
+    cook: str = "",
+    model: str | None = None,
+) -> dict:
     """A new candidate recipe from a written brief, validated before use."""
     try:
-        answer = gemini.draft(brief, project_name=project_name, cook=cook)
+        answer = gemini.draft(brief, project_name=project_name, cook=cook, model=model)
     except gemini.GeminiError as exc:
         return {"ok": False, "reason": str(exc)}
 
@@ -228,7 +236,7 @@ def draft(brief: str, *, project_name: str = "", cook: str = "") -> dict:
     if not ok:
         return {
             "ok": False,
-            "reason": answer.get("rationale") or "Gemini did not return a usable recipe.",
+            "reason": answer.get("rationale") or "The model did not return a usable recipe.",
             "notes": notes,
         }
 
@@ -249,12 +257,12 @@ def draft(brief: str, *, project_name: str = "", cook: str = "") -> dict:
     }
 
 
-def explain_blend(items: list[tuple[str, float]]) -> str:
+def explain_blend(items: list[tuple[str, float]], *, model: str | None = None) -> str:
     recipe = formulations.resolve(items)
     blend = nutrition.blend_nutrition(recipe)
     cost = nutrition.cost_per_kg(recipe)
-    return gemini.explain_blend(recipe, blend, cost)
+    return gemini.explain_blend(recipe, blend, cost, model=model)
 
 
-def explain_clean_label(findings: list[dict]) -> str:
-    return gemini.explain_clean_label(findings)
+def explain_clean_label(findings: list[dict], *, model: str | None = None) -> str:
+    return gemini.explain_clean_label(findings, model=model)

@@ -8,6 +8,7 @@ import auth
 import ui
 
 user = auth.require_login()
+ui.show_page_skeleton("people")
 is_admin = user["role"] == "lab_admin"
 
 with st.container(key="people_layout"):
